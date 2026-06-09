@@ -70,6 +70,26 @@ Good hosting options:
 
 Microphone recording requires HTTPS in production. Localhost is allowed for testing.
 
+## Deploy To Render
+
+This repo includes `render.yaml` for a Render Blueprint. It defines a Node web service in Frankfurt with:
+
+- `npm install` as the build command
+- `npm start` as the start command
+- `/api/health` as the health check
+- a persistent disk mounted at `/data`
+- `DATA_DIR=/data` so recordings and event logs survive deploys/restarts
+- generated `ADMIN_TOKEN`
+- dashboard prompts for `APP_BASE_URL` and `PROLIFIC_COMPLETION_URL`
+
+In Render:
+
+1. Create a new Blueprint from `mortezaro/mcampus-study-app`.
+2. Enter `APP_BASE_URL` after Render assigns the service URL, e.g. `https://mcampus-study-app.onrender.com`.
+3. Enter the real `PROLIFIC_COMPLETION_URL`.
+4. Keep the service on a paid plan if using the persistent disk for participant recordings.
+5. After deploy, open `/api/health` and then test the participant URL on a real phone.
+
 ## TestMyBrain Source
 
 The open-source task code is vendored under `vendor/tmb` so the deployed app is self-contained. Matching source folders served under `/tmb/...`:
