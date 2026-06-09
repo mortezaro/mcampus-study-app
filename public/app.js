@@ -120,13 +120,14 @@ const state = {
   cognitiveReturn: "finalSurvey",
   cognitiveOrder: [],
   currentEma: "",
+  baselineComplete: false,
   recorder: null
 };
 
 const stepOrder = [
   "welcome", "consent", "eligibility", "demographics", "sleep", "baselineState", "deviceCheck",
   "speech", "picture", "tmbIntro", "choiceRt", "digitSymbol", "gradCpt", "mot", "finalSurvey",
-  "emaHome", "emaSurvey", "emaSpeech", "emaPicture", "emaFinal", "done"
+  "baselineComplete", "emaHome", "emaSurvey", "emaSpeech", "emaPicture", "emaFinal", "emaComplete", "done"
 ];
 
 const COGNITIVE_TASK_KEYS = ["choice_rt", "digit_symbol", "grad_cpt", "mot"];
@@ -198,7 +199,8 @@ function saveLocal() {
     cognitivePhase: state.cognitivePhase,
     cognitiveReturn: state.cognitiveReturn,
     cognitiveOrder: state.cognitiveOrder,
-    currentEma: state.currentEma
+    currentEma: state.currentEma,
+    baselineComplete: state.baselineComplete
   }));
 }
 
@@ -604,7 +606,8 @@ function assignPrompts() {
   saveLocal();
 }
 
-function recorderMarkup(task, session, maxSeconds = 90, minSeconds = 60) {
+function recorderMarkup(task, session, maxSeconds = 120, minSeconds = 40, guidance = "") {
+  const help = guidance || `Aim for 60-90 seconds if you can. The Continue button unlocks after ${minSeconds} seconds; recording auto-stops at ${maxSeconds} seconds.`;
   return `
     <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-min="${minSeconds}" data-target="${maxSeconds}">
       <div class="meter"><span></span></div>
@@ -613,7 +616,7 @@ function recorderMarkup(task, session, maxSeconds = 90, minSeconds = 60) {
       <button class="button danger" data-action="stop" disabled>Stop and upload</button>
       ${DEMO_MODE ? `<button class="button secondary" data-action="demo">Demo: mark uploaded</button>` : ""}
       <audio controls hidden></audio>
-      <div class="small">Production quality rule: record at least ${minSeconds} seconds. You may stop after ${minSeconds} seconds; recording auto-stops at ${maxSeconds} seconds.</div>
+      <div class="small">${html(help)}</div>
     </div>
   `;
 }
@@ -703,9 +706,9 @@ function speechTask() {
   assignPrompts();
   page(`
     <h1>Spontaneous speech</h1>
-    <p class="lead">One prompt is randomly selected for each participant. Please speak continuously for 60-90 seconds.</p>
+    <p class="lead">One prompt is randomly selected for each participant. Please keep speaking for about 60-90 seconds if you can.</p>
     <div class="prompt">${html(state.assignments.speechPrompt)}</div>
-    ${recorderMarkup("baseline_open_speech", "baseline-open", 90)}
+    ${recorderMarkup("baseline_open_speech", "baseline-open", 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 40 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("baseline_open_speech", "baseline-open", () => {
@@ -769,10 +772,10 @@ function pictureTask() {
   const pic = state.assignments.picture;
   page(`
     <h1>Picture description</h1>
-    <p class="lead">Please describe the assigned scene for 60-90 seconds.</p>
+    <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
     ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 90)}
+    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 20 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("baseline_picture_speech", `picture-${pic.id}`, () => {
@@ -1251,9 +1254,26 @@ function finalSurvey() {
       { name: "final_interrupted", label: "Interrupted" },
       { name: "final_interruption_duration", label: "Interruption duration" }
     ])) return;
+    state.baselineComplete = true;
+    saveLocal();
     await logEvent("baseline_complete", { forms: state.forms, assignments: state.assignments, tmb: state.tmb });
-    go("emaHome");
+    go("baselineComplete");
   };
+}
+
+function baselineComplete() {
+  page(`
+    <h1>Baseline saved</h1>
+    <p class="lead">Your baseline session is complete and your responses have been saved on the study server.</p>
+    <div class="band">
+      <p><strong>You are done for this session.</strong> Please return to Prolific now to submit this baseline session.</p>
+      <p>For the daily EMA part, complete only one check-in each time you open a study link or reminder. Each check-in has its own short survey, speech tasks, cognitive tasks, and final save page.</p>
+    </div>
+    <div class="actions"><a class="button" href="${html(state.config.prolificCompletionUrl)}">Return to Prolific</a></div>
+    ${LOCALHOST || DEMO_MODE ? `<div class="actions"><button class="button secondary" id="emaTest">Researcher test: open EMA dashboard</button></div>` : ""}
+  `);
+  const emaTest = document.querySelector("#emaTest");
+  if (emaTest) emaTest.onclick = () => go("emaHome");
 }
 
 function buildPictureSchedule() {
@@ -1304,7 +1324,7 @@ function emaHome() {
   }
   page(`
     <h1>EMA dashboard</h1>
-    <p class="lead">Each daily session now runs the full mobile battery: survey, spontaneous speech, picture description, Choice RT, Digit Symbol, GradCPT, MOT, and interruption feedback.</p>
+    <p class="lead">Researcher/session dashboard. Participants should complete one check-in per link or reminder, then stop when the check-in saved page appears.</p>
     <div class="actions"><button class="button" id="nextDue">Start next check-in</button></div>
     <div class="schedule">
       ${rows.map(row => `
@@ -1314,7 +1334,7 @@ function emaHome() {
         </div>
       `).join("")}
     </div>
-    <div class="actions"><button class="button secondary" id="admin">Admin view</button><button class="button" id="finish">Finish study</button></div>
+    <div class="actions"><button class="button" id="finish">Finish study</button></div>
   `);
   document.querySelector("#nextDue").onclick = () => {
     const next = rows.find(row => !row.done) || rows[0];
@@ -1333,7 +1353,6 @@ function emaHome() {
     });
     go("emaSurvey");
   };
-  document.querySelector("#admin").onclick = () => go("admin");
   document.querySelector("#finish").onclick = () => go("done");
 }
 
@@ -1405,9 +1424,9 @@ function emaSpeech() {
   const draft = ensureEmaDraft();
   page(`
     <h1>Spontaneous speech</h1>
-    <p class="lead">Please speak continuously for 60-90 seconds.</p>
+    <p class="lead">Please keep speaking for about 60-90 seconds if you can.</p>
     <div class="prompt">${html(draft.spontaneousPrompt)}</div>
-    ${recorderMarkup("ema_open_speech", draft.key, 90)}
+    ${recorderMarkup("ema_open_speech", draft.key, 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 40 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("ema_open_speech", draft.key, () => {
@@ -1424,10 +1443,10 @@ function emaPicture() {
   const pic = draft.picture;
   page(`
     <h1>Picture description</h1>
-    <p class="lead">Please describe the assigned scene for 60-90 seconds.</p>
+    <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
     ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 90)}
+    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 20 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("ema_picture_speech", `${draft.key}-${pic.id}`, () => {
@@ -1485,8 +1504,23 @@ function emaFinal() {
     state.cognitiveOrder = [];
     saveLocal();
     await logEvent("ema_complete", { session: draft.key, ...state.ema[draft.key] });
-    go("emaHome");
+    go("emaComplete");
   };
+}
+
+function emaComplete() {
+  page(`
+    <h1>Check-in saved</h1>
+    <p class="lead">This daily check-in is complete and has been saved on the study server.</p>
+    <div class="band">
+      <p><strong>You are done for this session.</strong> Please return to Prolific or close this tab, depending on the instructions for this check-in.</p>
+      <p>Complete the next EMA session only when you receive the next study link or reminder.</p>
+    </div>
+    <div class="actions"><a class="button" href="${html(state.config.prolificCompletionUrl)}">Return to Prolific</a></div>
+    ${LOCALHOST || DEMO_MODE ? `<div class="actions"><button class="button secondary" id="emaTest">Researcher test: open EMA dashboard</button></div>` : ""}
+  `);
+  const emaTest = document.querySelector("#emaTest");
+  if (emaTest) emaTest.onclick = () => go("emaHome");
 }
 
 async function admin() {
@@ -1531,11 +1565,13 @@ function render() {
   else if (state.step === "gradCpt") gradCpt();
   else if (state.step === "mot") mot();
   else if (state.step === "finalSurvey") finalSurvey();
+  else if (state.step === "baselineComplete") baselineComplete();
   else if (state.step === "emaHome") emaHome();
   else if (state.step === "emaSurvey") emaSurvey();
   else if (state.step === "emaSpeech") emaSpeech();
   else if (state.step === "emaPicture") emaPicture();
   else if (state.step === "emaFinal") emaFinal();
+  else if (state.step === "emaComplete") emaComplete();
   else if (state.step === "admin") admin();
   else done();
 }

@@ -115,6 +115,116 @@ function appendEvent(event) {
   return row;
 }
 
+function readEvents() {
+  if (!fs.existsSync(EVENTS_FILE)) return [];
+  return fs.readFileSync(EVENTS_FILE, "utf8")
+    .trim()
+    .split("\n")
+    .filter(Boolean)
+    .map(line => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
+function summarizeParticipants(rows) {
+  const participants = new Map();
+
+  rows.forEach(row => {
+    const participantId = row.participantId || "unknown";
+    if (!participants.has(participantId)) {
+      participants.set(participantId, {
+        participantId,
+        studyIds: new Set(),
+        sessionIds: new Set(),
+        firstSeenAt: row.receivedAt,
+        lastSeenAt: row.receivedAt,
+        baselineComplete: false,
+        baselineCompletedAt: null,
+        emaCompleted: 0,
+        emaSessions: {},
+        uploads: [],
+        tmbEvents: [],
+        device: null,
+        eventCount: 0
+      });
+    }
+
+    const summary = participants.get(participantId);
+    summary.eventCount += 1;
+    if (row.studyId) summary.studyIds.add(row.studyId);
+    if (row.sessionId) summary.sessionIds.add(row.sessionId);
+    if (row.receivedAt && (!summary.firstSeenAt || row.receivedAt < summary.firstSeenAt)) summary.firstSeenAt = row.receivedAt;
+    if (row.receivedAt && (!summary.lastSeenAt || row.receivedAt > summary.lastSeenAt)) summary.lastSeenAt = row.receivedAt;
+
+    if (row.type === "baseline_complete") {
+      summary.baselineComplete = true;
+      summary.baselineCompletedAt = row.receivedAt;
+      summary.baselineAssignments = row.payload?.assignments || null;
+      summary.baselineForms = row.payload?.forms || null;
+    }
+
+    if (row.type === "device_check") {
+      summary.device = row.payload?.device_metadata || row.payload || summary.device;
+    }
+
+    if (row.type === "ema_complete") {
+      const key = row.payload?.session || row.payload?.key || "unknown";
+      summary.emaSessions[key] = {
+        completedAt: row.receivedAt,
+        day: row.payload?.day || null,
+        slot: row.payload?.slot || null,
+        slotLabel: row.payload?.label || null,
+        picture: row.payload?.picture?.id || row.payload?.picture || null,
+        pictureSchedulePosition: row.payload?.pictureSchedulePosition || null
+      };
+      summary.emaCompleted = Object.keys(summary.emaSessions).length;
+    }
+
+    if (row.type === "audio_upload") {
+      summary.uploads.push({
+        receivedAt: row.receivedAt,
+        task: row.task,
+        session: row.session,
+        bytes: row.bytes,
+        file: row.file
+      });
+    }
+
+    if ([
+      "cognitive_battery_start",
+      "tmb_task_complete",
+      "tmb_official_task_complete",
+      "tmb_official_task_result"
+    ].includes(row.type)) {
+      summary.tmbEvents.push({
+        receivedAt: row.receivedAt,
+        type: row.type,
+        task: row.payload?.task || null,
+        phase: row.payload?.phase || null,
+        taskPosition: row.payload?.taskPosition || null,
+        taskCount: row.payload?.taskCount || null,
+        cognitiveOrder: row.payload?.cognitiveOrder || null,
+        emaSession: row.payload?.emaSession || null,
+        emaDay: row.payload?.emaDay || null,
+        emaSlot: row.payload?.emaSlot || null
+      });
+    }
+  });
+
+  return Array.from(participants.values())
+    .map(summary => ({
+      ...summary,
+      studyIds: Array.from(summary.studyIds),
+      sessionIds: Array.from(summary.sessionIds)
+    }))
+    .sort((a, b) => String(b.lastSeenAt || "").localeCompare(String(a.lastSeenAt || "")));
+}
+
 function safeName(value) {
   return String(value || "unknown").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
 }
@@ -238,10 +348,25 @@ async function handleApi(req, res) {
 
   if (req.method === "GET" && url.pathname === "/api/admin/events") {
     if (!requireAdmin(req, res, url)) return;
-    const rows = fs.existsSync(EVENTS_FILE)
-      ? fs.readFileSync(EVENTS_FILE, "utf8").trim().split("\n").filter(Boolean).map(line => JSON.parse(line))
-      : [];
+    let rows = readEvents();
+    const participantId = url.searchParams.get("participantId");
+    if (participantId) rows = rows.filter(row => row.participantId === participantId);
     sendJson(res, 200, { rows });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/admin/participants") {
+    if (!requireAdmin(req, res, url)) return;
+    sendJson(res, 200, { participants: summarizeParticipants(readEvents()) });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname.startsWith("/api/admin/participants/")) {
+    if (!requireAdmin(req, res, url)) return;
+    const participantId = decodeURIComponent(url.pathname.replace(/^\/api\/admin\/participants\//, ""));
+    const rows = readEvents().filter(row => row.participantId === participantId);
+    const summary = summarizeParticipants(rows)[0] || null;
+    sendJson(res, 200, { participant: summary, rows });
     return;
   }
 
