@@ -118,6 +118,7 @@ const state = {
   tmb: {},
   cognitivePhase: "baseline",
   cognitiveReturn: "finalSurvey",
+  cognitiveOrder: [],
   currentEma: "",
   recorder: null
 };
@@ -127,6 +128,15 @@ const stepOrder = [
   "speech", "picture", "tmbIntro", "choiceRt", "digitSymbol", "gradCpt", "mot", "finalSurvey",
   "emaHome", "emaSurvey", "emaSpeech", "emaPicture", "emaFinal", "done"
 ];
+
+const COGNITIVE_TASK_KEYS = ["choice_rt", "digit_symbol", "grad_cpt", "mot"];
+
+const COGNITIVE_STEP_BY_TASK = {
+  choice_rt: "choiceRt",
+  digit_symbol: "digitSymbol",
+  grad_cpt: "gradCpt",
+  mot: "mot"
+};
 
 function html(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -187,6 +197,7 @@ function saveLocal() {
     tmb: state.tmb,
     cognitivePhase: state.cognitivePhase,
     cognitiveReturn: state.cognitiveReturn,
+    cognitiveOrder: state.cognitiveOrder,
     currentEma: state.currentEma
   }));
 }
@@ -744,7 +755,7 @@ function pictureTask() {
   const pic = state.assignments.picture;
   page(`
     <h1>Picture description</h1>
-    <p class="lead">One of 12 picture scenes is randomly assigned here. Across EMA we can schedule all 12 scenes three times without adjacent repeats.</p>
+    <p class="lead">Please describe the assigned scene for 60-90 seconds.</p>
     ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
     ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 90)}
@@ -760,16 +771,40 @@ function pictureTask() {
 function tmbIntro() {
   page(`
     <h1>Cognitive tasks</h1>
-    <p class="lead">Next are four brief cognitive tasks. The baseline version is longer; daily check-ins use shorter EMA versions so phone sessions stay manageable.</p>
+    <p class="lead">Next are four brief cognitive tasks. The baseline version is longer; daily check-ins use shorter EMA versions, and task order may vary across sessions.</p>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Start tasks</button></div>
   `);
   document.querySelector("#back").onclick = () => go("picture");
-  document.querySelector("#next").onclick = () => {
-    state.cognitivePhase = "baseline";
-    state.cognitiveReturn = "finalSurvey";
-    saveLocal();
-    go("choiceRt");
-  };
+  document.querySelector("#next").onclick = () => startCognitiveBattery("baseline", "finalSurvey");
+}
+
+function buildCognitiveOrder() {
+  const sessionKey = state.cognitivePhase === "ema" ? state.emaDraft?.key || state.currentEma || "ema" : "baseline";
+  return COGNITIVE_TASK_KEYS
+    .map(task => ({ task, rank: uidHash(`${state.participantId}:${sessionKey}:cognitive:${task}`, 1000000) }))
+    .sort((a, b) => a.rank - b.rank)
+    .map(item => item.task);
+}
+
+function startCognitiveBattery(phase, returnStep) {
+  state.cognitivePhase = phase;
+  state.cognitiveReturn = returnStep;
+  state.cognitiveOrder = buildCognitiveOrder();
+  saveLocal();
+  go(COGNITIVE_STEP_BY_TASK[state.cognitiveOrder[0]] || "choiceRt");
+}
+
+function nextCognitiveStep(taskKey) {
+  const order = Array.isArray(state.cognitiveOrder) && state.cognitiveOrder.length ? state.cognitiveOrder : COGNITIVE_TASK_KEYS;
+  const index = order.indexOf(taskKey);
+  const nextTask = index >= 0 ? order[index + 1] : null;
+  return nextTask ? COGNITIVE_STEP_BY_TASK[nextTask] : state.cognitiveReturn || "finalSurvey";
+}
+
+function lastCognitiveStep() {
+  const order = Array.isArray(state.cognitiveOrder) && state.cognitiveOrder.length ? state.cognitiveOrder : COGNITIVE_TASK_KEYS;
+  const lastTask = order[order.length - 1];
+  return COGNITIVE_STEP_BY_TASK[lastTask] || "mot";
 }
 
 function finishTask(task, trials, next) {
@@ -879,7 +914,7 @@ async function markOfficialTmbComplete(taskKey) {
 
 function officialTmbTask(taskKey) {
   const task = TMB_TASKS[taskKey];
-  const next = taskKey === "mot" ? (state.cognitiveReturn || "finalSurvey") : task.next;
+  const next = nextCognitiveStep(taskKey);
   const url = tmbUrl(taskKey);
   const demo = DEMO_MODE;
   const duration = state.cognitivePhase === "ema" ? task.emaDuration : task.baselineDuration;
@@ -906,6 +941,7 @@ function officialTmbTask(taskKey) {
     phase: state.cognitivePhase,
     emaSession: state.emaDraft?.key || null,
     task: taskKey,
+    cognitiveOrder: state.cognitiveOrder,
     sourceFolder: task.sourceFolder,
     sourceFile: task.sourceFile,
     url
@@ -935,6 +971,7 @@ function officialTmbTask(taskKey) {
       phase: state.cognitivePhase,
       emaSession: state.emaDraft?.key || null,
       task: taskKey,
+      cognitiveOrder: state.cognitiveOrder,
       ...summary
     });
     const status = document.querySelector("#tmbStatus");
@@ -1167,7 +1204,7 @@ function finalSurvey() {
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Save baseline</button></div>
   `);
   bindFields();
-  document.querySelector("#back").onclick = () => go("mot");
+  document.querySelector("#back").onclick = () => go(lastCognitiveStep());
   document.querySelector("#next").onclick = async () => {
     if (!requireFields([
       ...scaleFieldList(finalScales, "final"),
@@ -1330,10 +1367,7 @@ function emaPicture() {
   });
   document.querySelector("#back").onclick = () => go("emaSpeech");
   document.querySelector("#next").onclick = () => {
-    state.cognitivePhase = "ema";
-    state.cognitiveReturn = "emaFinal";
-    saveLocal();
-    go("choiceRt");
+    startCognitiveBattery("ema", "emaFinal");
   };
 }
 
@@ -1358,7 +1392,7 @@ function emaFinal() {
     state.cognitivePhase = "ema";
     state.cognitiveReturn = "emaFinal";
     saveLocal();
-    go("mot");
+    go(lastCognitiveStep());
   };
   document.querySelector("#save").onclick = async () => {
     draft.final = {
@@ -1378,6 +1412,7 @@ function emaFinal() {
     state.emaDraft = null;
     state.cognitivePhase = "baseline";
     state.cognitiveReturn = "finalSurvey";
+    state.cognitiveOrder = [];
     saveLocal();
     await logEvent("ema_complete", { session: draft.key, ...state.ema[draft.key] });
     go("emaHome");
