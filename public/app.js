@@ -607,7 +607,7 @@ function assignPrompts() {
 }
 
 function recorderMarkup(task, session, maxSeconds = 120, minSeconds = 40, guidance = "") {
-  const help = guidance || `Aim for 60-90 seconds if you can. The Continue button unlocks after ${minSeconds} seconds; recording auto-stops at ${maxSeconds} seconds.`;
+  const help = guidance || `Aim for 60-90 seconds if you can. Recording auto-stops at ${maxSeconds} seconds.`;
   return `
     <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-min="${minSeconds}" data-target="${maxSeconds}">
       <div class="meter"><span></span></div>
@@ -708,7 +708,7 @@ function speechTask() {
     <h1>Spontaneous speech</h1>
     <p class="lead">One prompt is randomly selected for each participant. Please keep speaking for about 60-90 seconds if you can.</p>
     <div class="prompt">${html(state.assignments.speechPrompt)}</div>
-    ${recorderMarkup("baseline_open_speech", "baseline-open", 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 40 seconds.")}
+    ${recorderMarkup("baseline_open_speech", "baseline-open", 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("baseline_open_speech", "baseline-open", () => {
@@ -775,7 +775,7 @@ function pictureTask() {
     <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
     ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 20 seconds.")}
+    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("baseline_picture_speech", `picture-${pic.id}`, () => {
@@ -1426,7 +1426,7 @@ function emaSpeech() {
     <h1>Spontaneous speech</h1>
     <p class="lead">Please keep speaking for about 60-90 seconds if you can.</p>
     <div class="prompt">${html(draft.spontaneousPrompt)}</div>
-    ${recorderMarkup("ema_open_speech", draft.key, 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 40 seconds.")}
+    ${recorderMarkup("ema_open_speech", draft.key, 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("ema_open_speech", draft.key, () => {
@@ -1446,7 +1446,7 @@ function emaPicture() {
     <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
     ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds; the Continue button unlocks after 20 seconds.")}
+    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
   `);
   attachRecorder("ema_picture_speech", `${draft.key}-${pic.id}`, () => {
