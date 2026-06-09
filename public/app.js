@@ -121,8 +121,9 @@ function uidHash(seed, max) {
 
 function params() {
   const query = new URLSearchParams(window.location.search);
+  const participantId = query.get("PROLIFIC_PID") || query.get("participant") || query.get("pid") || (LOCALHOST ? localStorage.getItem("mcampusParticipantId") : "");
   return {
-    participantId: query.get("PROLIFIC_PID") || query.get("participant") || query.get("pid") || localStorage.getItem("mcampusParticipantId") || "",
+    participantId: participantId || "",
     studyId: query.get("STUDY_ID") || "",
     sessionId: query.get("SESSION_ID") || ""
   };
