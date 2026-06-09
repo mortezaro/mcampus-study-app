@@ -33,6 +33,9 @@ const MIME = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".gif": "image/gif",
+  ".m4a": "audio/mp4",
+  ".mp4": "audio/mp4",
+  ".ogg": "audio/ogg",
   ".webm": "audio/webm",
   ".wav": "audio/wav"
 };
@@ -234,6 +237,14 @@ function safeUploadFilename(value) {
   return /^[a-zA-Z0-9._-]+$/.test(filename) ? filename : "";
 }
 
+function audioExtension(contentType = "") {
+  const type = contentType.toLowerCase();
+  if (type.includes("wav")) return "wav";
+  if (type.includes("mp4") || type.includes("aac") || type.includes("m4a")) return "m4a";
+  if (type.includes("ogg")) return "ogg";
+  return "webm";
+}
+
 function requireAdmin(req, res, url) {
   if (!ADMIN_TOKEN && NODE_ENV === "production") {
     sendJson(res, 503, { error: "Admin export disabled until ADMIN_TOKEN is configured." });
@@ -328,7 +339,7 @@ async function handleApi(req, res) {
     const participantId = safeName(url.searchParams.get("participantId"));
     const task = safeName(url.searchParams.get("task"));
     const session = safeName(url.searchParams.get("session"));
-    const ext = req.headers["content-type"]?.includes("wav") ? "wav" : "webm";
+    const ext = audioExtension(req.headers["content-type"] || "");
     const id = crypto.randomUUID();
     const filename = `${participantId}_${task}_${session}_${Date.now()}_${id}.${ext}`;
     const filePath = path.join(UPLOAD_DIR, filename);
