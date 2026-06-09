@@ -81,6 +81,28 @@ const TIME_ZONE_OPTIONS = [
   "Other / not listed"
 ];
 
+const BEDTIME_OPTIONS = [
+  "Before 9:00 PM",
+  "9:00-10:00 PM",
+  "10:00-11:00 PM",
+  "11:00 PM-12:00 AM",
+  "12:00-1:00 AM",
+  "1:00-2:00 AM",
+  "After 2:00 AM",
+  "Varies a lot"
+];
+
+const WAKETIME_OPTIONS = [
+  "Before 5:00 AM",
+  "5:00-6:00 AM",
+  "6:00-7:00 AM",
+  "7:00-8:00 AM",
+  "8:00-9:00 AM",
+  "9:00-10:00 AM",
+  "After 10:00 AM",
+  "Varies a lot"
+];
+
 const state = {
   config: null,
   step: "welcome",
@@ -308,7 +330,7 @@ function scaleRows(items, prefix, min = "Low", max = "High") {
 function welcome() {
   page(`
     <h1>Start your M-CAMPUS session</h1>
-    <p class="lead">This local version now contains the baseline, questionnaires, randomized speech tasks, local TMB-style tests, and the 12-day EMA dashboard in one mobile-friendly flow.</p>
+    <p class="lead">This study includes a baseline session, short questionnaires, randomized speech tasks, cognitive tasks, and a 12-day daily check-in dashboard in one mobile-friendly flow.</p>
     <div class="field">
       <label for="pid">Participant ID</label>
       <input id="pid" class="input" autocomplete="off" value="${html(state.participantId)}" placeholder="Loaded from Prolific when available">
@@ -363,7 +385,7 @@ function consent() {
 function eligibility() {
   const q = [
     ["age18_70", "I am between 18 and 70 years old."],
-    ["english", "I am fluent enough in English to complete speech and questionnaire tasks."],
+    ["english", "I am a native English speaker."],
     ["smartphone", "I have access to a smartphone with a working microphone and internet connection."],
     ["daily", "I am willing to complete 3 short sessions per day for 12 days."],
     ["audio", "I am willing to provide short audio recordings."],
@@ -415,8 +437,7 @@ function demographics() {
     <div class="field"><label>Age <span class="required">*</span></label><input class="input" inputmode="numeric" data-field="age" value="${val("age")}" required></div>
     <div class="field"><label>Gender <span class="required">*</span></label><select data-field="gender" required>${selectOptions(["Woman", "Man", "Non-binary", "Prefer to self-describe", "Prefer not to say"], state.forms.gender)}</select></div>
     <div class="field"><label>Education <span class="required">*</span></label><select data-field="education" required>${selectOptions(["Secondary school", "Vocational training", "Some college/university", "Bachelor's degree", "Master's degree", "Doctoral degree", "Other"], state.forms.education)}</select></div>
-    <div class="field"><label>Primary language <span class="required">*</span></label><input class="input" data-field="primary_language" value="${val("primary_language")}" required></div>
-    <div class="field"><label>English fluency <span class="required">*</span></label><select data-field="english_fluency" required>${selectOptions(["Native or near-native", "Fluent", "Comfortable", "Limited"], state.forms.english_fluency)}</select></div>
+    <div class="field"><label>Are you bilingual or multilingual? <span class="required">*</span></label><select data-field="multilingual" required>${selectOptions(["No, English only", "Yes, bilingual", "Yes, multilingual", "Prefer not to say"], state.forms.multilingual)}</select></div>
     <div class="field"><label>Country <span class="required">*</span></label><select data-field="country" required>${selectOptions(COUNTRY_OPTIONS, state.forms.country)}</select></div>
     <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
@@ -428,8 +449,7 @@ function demographics() {
       { name: "age", label: "Age" },
       { name: "gender", label: "Gender" },
       { name: "education", label: "Education" },
-      { name: "primary_language", label: "Primary language" },
-      { name: "english_fluency", label: "English fluency" },
+      { name: "multilingual", label: "Bilingual or multilingual" },
       { name: "country", label: "Country" },
       { name: "timezone", label: "Time zone" }
     ])) return;
@@ -444,8 +464,8 @@ function sleep() {
   page(`
     <h1>Sleep and routines</h1>
     <p class="lead">These items help anchor daily variation.</p>
-    <div class="field"><label>Usual bedtime <span class="required">*</span></label><input class="input" type="time" data-field="usual_bedtime" value="${val("usual_bedtime")}" required></div>
-    <div class="field"><label>Usual wake time <span class="required">*</span></label><input class="input" type="time" data-field="usual_waketime" value="${val("usual_waketime")}" required></div>
+    <div class="field"><label>Usual bedtime <span class="required">*</span></label><select data-field="usual_bedtime" required>${selectOptions(BEDTIME_OPTIONS, state.forms.usual_bedtime)}</select></div>
+    <div class="field"><label>Usual wake time <span class="required">*</span></label><select data-field="usual_waketime" required>${selectOptions(WAKETIME_OPTIONS, state.forms.usual_waketime)}</select></div>
     <div class="field"><label>Hours slept last night <span class="required">*</span></label><input class="input" inputmode="decimal" data-field="sleep_hours" value="${val("sleep_hours")}" required></div>
     ${scaleRows(sleepScales, "sleep", "Low", "High")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
@@ -733,10 +753,7 @@ function pictureTask() {
 function tmbIntro() {
   page(`
     <h1>Cognitive tasks</h1>
-    <p class="lead">Next are four brief phone-friendly task modules corresponding to the protocol's TMB anchors: Choice RT, Digit Symbol Matching, GradCPT, and MOT.</p>
-    <div class="band">
-      <p>The matching open-source TestMyBrain folders are <code>TMB_ChoiceRT</code>, <code>TMB_DigitSymbolMatching</code>, <code>TMB_GradCPT</code>, and <code>TMB_MOT</code> in the Many Brains GitHub repository. These standard pages are hosted locally inside the M-CAMPUS flow.</p>
-    </div>
+    <p class="lead">Next are four brief cognitive tasks. The baseline version is longer; daily check-ins use shorter EMA versions so phone sessions stay manageable.</p>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Start tasks</button></div>
   `);
   document.querySelector("#back").onclick = () => go("picture");
@@ -776,7 +793,8 @@ const TMB_TASKS = {
     baselineParams: { ntrials: "30", nopractice: "optional", chooseinput: "false" },
     emaParams: { ntrials: "6", nopractice: "true", chooseinput: "false" },
     instructions: "Find the odd-colored square, look at the arrow inside it, then tap the left or right gray button. If you wait more than 5 seconds, the official task asks you to retry that trial.",
-    duration: "EMA: 6 trials, usually under 1 minute. Baseline: 30 trials, about 1-2 minutes."
+    baselineDuration: "30 trials, usually about 1-2 minutes plus instructions.",
+    emaDuration: "6 trials, usually under 1 minute plus instructions."
   },
   digit_symbol: {
     title: "Digit Symbol Matching",
@@ -786,7 +804,8 @@ const TMB_TASKS = {
     baselineParams: { duration: "90", nopractice: "optional", chooseinput: "false" },
     emaParams: { duration: "20", nopractice: "true", chooseinput: "false" },
     instructions: "Use the symbol-number key and choose the matching response as quickly and accurately as you can.",
-    duration: "EMA: 20 seconds plus instructions. Baseline: 90 seconds plus instructions."
+    baselineDuration: "90-second standard timed block plus instructions.",
+    emaDuration: "20-second short timed block plus instructions."
   },
   grad_cpt: {
     title: "GradCPT",
@@ -796,7 +815,8 @@ const TMB_TASKS = {
     baselineParams: { ntrials: "150", nopractice: "optional", chooseinput: "false" },
     emaParams: { ntrials: "30", nopractice: "true", chooseinput: "false" },
     instructions: "Tap city pictures as they appear. Do not tap mountain pictures.",
-    duration: "EMA: 30 image transitions, about 24 seconds plus instructions. Baseline: 150 transitions, about 2 minutes plus instructions."
+    baselineDuration: "150 image transitions, about 2 minutes plus instructions.",
+    emaDuration: "30 image transitions, about 24 seconds plus instructions."
   },
   mot: {
     title: "Multiple Object Tracking",
@@ -804,9 +824,10 @@ const TMB_TASKS = {
     sourceFile: "MOT_Main.v1.Jun23.html",
     next: null,
     baselineParams: { dots: "10", nopractice: "optional" },
-    emaParams: { dots: "10", nopractice: "true", demo: "true" },
+    emaParams: { dots: "10", nopractice: "true", ema: "true" },
     instructions: "Track the dots that flash, then select those target dots after they move.",
-    duration: "EMA: short demo block, about 30-60 seconds. Baseline: longer standard block."
+    baselineDuration: "Standard 3-, 4-, and 5-target blocks, roughly 3-5 minutes plus instructions.",
+    emaDuration: "Official EMA-style 5-target block with 6 trials, roughly 1-2 minutes plus instructions."
   }
 };
 
@@ -854,12 +875,14 @@ function officialTmbTask(taskKey) {
   const next = taskKey === "mot" ? (state.cognitiveReturn || "finalSurvey") : task.next;
   const url = tmbUrl(taskKey);
   const demo = DEMO_MODE;
+  const duration = state.cognitivePhase === "ema" ? task.emaDuration : task.baselineDuration;
+  const versionLabel = state.cognitivePhase === "ema" ? "Daily version" : "Baseline version";
   page(`
     <h1>${html(task.title)}</h1>
-    <p class="lead">Standard TestMyBrain task loaded from <code>${html(task.sourceFolder)}</code> in the Many Brains GitHub repository.</p>
+    <p class="lead">${html(versionLabel)}.</p>
     <div class="band compact">
       <p><strong>What to do:</strong> ${html(task.instructions)}</p>
-      <p><strong>Approximate time:</strong> ${html(task.duration)}</p>
+      <p><strong>Length:</strong> ${html(duration)}</p>
     </div>
     <iframe class="tmb-frame" src="${html(url)}" title="${html(task.title)}"></iframe>
     <div class="band">
@@ -1133,7 +1156,7 @@ function finalSurvey() {
     ${scaleRows(finalScales, "final", "Low", "High")}
     <div class="field"><label>Did anything interrupt you? <span class="required">*</span></label><select data-field="final_interrupted" required>${selectOptions(["No", "Yes, once", "Yes, several times"], state.forms.final_interrupted)}</select></div>
     <div class="field"><label>Approximate interruption duration <span class="required">*</span></label><select data-field="final_interruption_duration" required>${selectOptions(["None", "Less than 1 minute", "1-5 minutes", "More than 5 minutes"], state.forms.final_interruption_duration)}</select></div>
-    <div class="field"><label>Any adverse event, concern, or feedback? <span class="required">*</span></label><textarea data-field="final_feedback" required placeholder="Write None if there was nothing unusual.">${val("final_feedback")}</textarea></div>
+    <div class="field"><label>Any adverse event, concern, or feedback?</label><textarea data-field="final_feedback" placeholder="Optional">${val("final_feedback")}</textarea></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Save baseline</button></div>
   `);
   bindFields();
@@ -1142,8 +1165,7 @@ function finalSurvey() {
     if (!requireFields([
       ...scaleFieldList(finalScales, "final"),
       { name: "final_interrupted", label: "Interrupted" },
-      { name: "final_interruption_duration", label: "Interruption duration" },
-      { name: "final_feedback", label: "Adverse event, concern, or feedback" }
+      { name: "final_interruption_duration", label: "Interruption duration" }
     ])) return;
     await logEvent("baseline_complete", { forms: state.forms, assignments: state.assignments, tmb: state.tmb });
     go("emaHome");
@@ -1242,7 +1264,7 @@ function emaSurvey() {
   page(`
     <h1>Day ${draft.day}: ${html(draft.label)}</h1>
     <p class="lead">First, answer based on how you feel right now.</p>
-    ${scaleRows([["mood", "Mood"], ["stress", "Stress"], ["fatigue", "Fatigue"], ["focus", "Difficulty focusing"], ["noise", "Background noise"], ["interruptions", "Interruptions since last check-in"]], `ema_${draft.key}`, "Low", "High")}
+    ${scaleRows([["mood", "Mood"], ["stress", "Stress"], ["fatigue", "Fatigue"], ["focus", "Difficulty focusing"], ["noise", "Background noise"]], `ema_${draft.key}`, "Low", "High")}
     <div class="field"><label>Where are you?</label><select data-field="ema_${draft.key}_location">${selectOptions(["Home", "Work or school", "Public indoor place", "Outdoors", "In transit", "Other"], state.forms[`ema_${draft.key}_location`])}</select></div>
     <div class="field"><label>Current context</label><textarea id="emaContext" placeholder="A few words about where you are or what you are doing"></textarea></div>
     <div class="actions"><button class="button secondary" id="cancel">Back</button><button class="button" id="next">Continue</button></div>
@@ -1256,7 +1278,6 @@ function emaSurvey() {
       fatigue: state.forms[`ema_${draft.key}_fatigue`],
       focus: state.forms[`ema_${draft.key}_focus`],
       noise: state.forms[`ema_${draft.key}_noise`],
-      interruptions: state.forms[`ema_${draft.key}_interruptions`],
       location: state.forms[`ema_${draft.key}_location`],
       context: document.querySelector("#emaContext").value
     };
@@ -1318,8 +1339,7 @@ function emaFinal() {
       ["difficulty", "Overall difficulty"],
       ["frustration", "Frustration or discomfort"],
       ["privacy", "Concern about audio/privacy"],
-      ["distraction", "Distraction during the session"],
-      ["usability", "Ease of completing this on your phone"]
+      ["distraction", "Distraction during the session"]
     ], `ema_final_${draft.key}`, "Low", "High")}
     <div class="field"><label>Was this check-in interrupted?</label><select data-field="ema_final_${draft.key}_interrupted">${selectOptions(["No", "Yes, briefly", "Yes, substantially"], state.forms[`ema_final_${draft.key}_interrupted`])}</select></div>
     <div class="field"><label>Approximate interruption duration</label><select data-field="ema_final_${draft.key}_duration">${selectOptions(["None", "Less than 1 minute", "1-5 minutes", "More than 5 minutes"], state.forms[`ema_final_${draft.key}_duration`])}</select></div>
@@ -1339,7 +1359,6 @@ function emaFinal() {
       frustration: state.forms[`ema_final_${draft.key}_frustration`],
       privacy: state.forms[`ema_final_${draft.key}_privacy`],
       distraction: state.forms[`ema_final_${draft.key}_distraction`],
-      usability: state.forms[`ema_final_${draft.key}_usability`],
       interrupted: state.forms[`ema_final_${draft.key}_interrupted`],
       duration: state.forms[`ema_final_${draft.key}_duration`],
       feedback: state.forms[`ema_final_${draft.key}_feedback`]
