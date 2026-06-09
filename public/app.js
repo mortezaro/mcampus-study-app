@@ -31,23 +31,23 @@ const SPEECH_PROMPTS = [
 ];
 
 const PICTURES = [
-  ["kitchen", "Kitchen scene"],
-  ["living_room", "Living room scene"],
-  ["outdoor_market", "Outdoor market scene"],
-  ["park_picnic", "Park picnic scene"],
-  ["cafe", "Cafe scene"],
-  ["crosswalk", "Street crossing scene"],
-  ["playground", "Playground scene"],
-  ["birthday_party", "Birthday party scene"],
-  ["office", "Office scene"],
-  ["supermarket", "Supermarket aisle scene"],
-  ["beach", "Beach scene"],
-  ["train_station", "Train station scene"]
-].map(([id, title]) => ({
+  ["picture_01", "Picture 1", "/assets/pictures/picture_01.png"],
+  ["picture_02", "Picture 2", "/assets/pictures/picture_02.png"],
+  ["picture_03", "Picture 3", "/assets/pictures/picture_03.png"],
+  ["picture_04", "Picture 4", "/assets/pictures/picture_04.png"],
+  ["picture_05", "Picture 5", "/assets/pictures/picture_05.png"],
+  ["picture_06", "Picture 6", "/assets/pictures/picture_06.png"],
+  ["picture_07", "Picture 7", "/assets/pictures/picture_07.png"],
+  ["picture_08", "Picture 8", "/assets/pictures/picture_08.png"],
+  ["picture_09", "Picture 9", "/assets/pictures/picture_09.png"],
+  ["picture_10", "Picture 10", "/assets/pictures/picture_10.png"],
+  ["picture_11", "Picture 11", "/assets/pictures/picture_11.png"],
+  ["picture_12", "Picture 12", "/assets/pictures/picture_12.png"]
+].map(([id, title, src]) => ({
   id,
   title,
   prompt: "Please describe this picture in as much detail as you can. Mention the main people or objects, actions, setting, and anything unusual.",
-  svg: id
+  src
 }));
 
 const COUNTRY_OPTIONS = [
@@ -732,13 +732,20 @@ function sceneSvg(kind) {
     </svg>`;
 }
 
+function pictureStimulus(pic) {
+  if (pic.src) {
+    return `<img class="picture-stimulus" src="${html(pic.src)}" alt="${html(pic.title)} picture description stimulus">`;
+  }
+  return sceneSvg(pic.svg);
+}
+
 function pictureTask() {
   assignPrompts();
   const pic = state.assignments.picture;
   page(`
     <h1>Picture description</h1>
     <p class="lead">One of 12 picture scenes is randomly assigned here. Across EMA we can schedule all 12 scenes three times without adjacent repeats.</p>
-    ${sceneSvg(pic.svg)}
+    ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
     ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 90)}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
@@ -1311,7 +1318,7 @@ function emaPicture() {
   page(`
     <h1>Picture description</h1>
     <p class="lead">Please describe the assigned scene for 60-90 seconds.</p>
-    ${sceneSvg(pic.svg)}
+    ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
     ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 90)}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>

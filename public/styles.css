@@ -331,6 +331,16 @@ textarea {
   aspect-ratio: 4 / 3;
 }
 
+.picture-stimulus {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 16px 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
 .schedule {
   display: grid;
   gap: 10px;
