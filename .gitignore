@@ -1,0 +1,19 @@
+.DS_Store
+node_modules/
+.env
+.env.*
+!.env.example
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Participant data and recordings must not go to GitHub.
+data/events.jsonl
+data/uploads/
+data/*.jsonl
+data/*.csv
+data/*.zip
+
+# Local temporary output.
+tmp/
+coverage/

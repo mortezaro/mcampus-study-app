@@ -1,0 +1,1561 @@
+
+--- PAGE 1 ---
+ 
+ 
+Faculty of Arts and Social Sciences 
+Ethics Committee 
+  
+Application Form for Registration of a Research Project 
+Based on the “Antragsformular der Philosophisch-humanwissenschaftliche Fakultät der 
+Universität Bern” and the „Checkliste für ethische Beurteilung von psychologischen 
+Forschungsvorhaben“ of the Swiss Psychological Society (SPS) 
+ 
+☒ Individual application    ☐ Group application 
+ 
+☐ Amendment            Registration No. (for amendments) 
+ 
+1. General Information 
+a. Name and contact information of 
+applicant 
+Prof. Michael Krauthammer 
+Department of Quantitative Biomedicine 
+University of Zurich 
+Email: michael.krauthammer@uzh.ch 
+ 
+b. Name(s) of person(s) carrying out the 
+research, including contact information 
+Dr. Morteza Rohanian 
+KrauthammerLab, Department of Quantitative 
+Biomedicine 
+University of Zurich 
+Email: morteza.rohanian@uzh.ch 
+ 
+c. Who provides funding for the research 
+project? 
+The project is funded by internal funds of the 
+University of Zurich 
+d. Responsible department Department of Quantitative Biomedicine 
+ 
+e. Sub-discipline Cognitive science / digital neuropsychology / 
+psychological methods 
+ 
+f. Subject/Title of project M-CAMPUS: A within-subject mobile study testing 
+whether speech and smartphone-captured 
+context predict momentary cognitive 
+performance in naturalistic environments 
+g. Summary of project (max. 1ʼ000 characters)  
+This project investigates how attention and thinking ability fluctuate in everyday life and 
+whether short speech samples and simple smartphone-based context signals can predict 
+these fluctuations. Healthy adults (18–70 years) complete a baseline cognitive session and 
+then brief sessions (5–7 minutes) on their own smartphones three times per day over 12 days. 
+Each session includes a short state/context questionnaire (e.g. stress, fatigue, mood, location 
+type, perceived noise), a 60–90 second speech prompt (picture description and 
+semi-structured QA/narrative), and validated TestMyBrain (TMB) cognitive tasks. 
+ Smartphone-based measures (e.g. device-relative ambient noise proxy, interruptions, device 
+metadata) are recorded alongside performance. The study is fully remote, observational, and 
+ 
+
+
+--- PAGE 2 ---
+ 
+non-clinical. Analyses focus on within-person variability and on how well speech features and 
+contextual signals improve prediction of momentary cognitive performance beyond simple 
+baselines. 
+ 
+h. Time period for which registration is 
+requested 
+Planned project period: 01.01.2026 – 31.12.2027 
+ 
+ 
+i. Does the research funding body require an 
+assessment from an ethics committee? 
+☐ Yes 
+☒ No 
+j. Does the research funding body or the law 
+require a project registration? 
+☐ Yes. Relevant legislation:       
+☒ No 
+ 
+2. Research Procedure 
+a. Participants (targeted number, sex, age, education, population) 
+a. Participants (targeted number, sex, age, education, population) 
+We aim to recruit approximately 120 healthy adult participants. 
+Participants will be: 
+● Age: 18–70 years 
+● Sex/gender: All genders; no quotas 
+● Education: No specific requirements; education level is recorded (high school to 
+graduate/professional degree) 
+● Population: Healthy adults fluent in the study language (English), with access to a 
+smartphone with microphone and internet. 
+● Exclusion criteria: major neurological disorders, major uncorrected speech/hearing 
+impairment, or acute psychiatric crisis. 
+Participants represent a non-clinical sample of healthy adults recruited online. 
+ 
+b. What personal data are acquired (study variables)? 
+The following data are collected: 
+1. Speech recordings (60–90 seconds per session) and derived speech features 
+o e.g., speech rate, pauses, disfluencies, prosody, lexical diversity, semantic 
+coherence 
+o Voice recordings are inherently re-identifiable biometric data. 
+2. Cognitive performance measures from mobile TestMyBrain tasks 
+o trial-level accuracy, reaction time, and task-specific performance indices. 
+3. Self-report survey data collected before cognitive tasks 
+o aﬀect (PANAS short form), stressors, social functioning, anxiety/depression 
+items, alertness, contextual items (noise, distractions), attentional diﬀiculty 
+items. 
+4. Smartphone/context signals (device-level, non-identifying) 
+o ambient noise proxy/SNR estimate (device-relative) 
+o app visibility/interruptions 
+o device type, OS, network stability 
+o time stamps, study day, screen height/width. 
+5. Demographics 
+o age, gender, education, primary language, sleep habits. 
+No names, email addresses, phone numbers, IP addresses, or direct identifiers are collected 
+by the research team. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 2   |   40  
+
+--- PAGE 3 ---
+ 
+Gorilla may temporarily store contact details for account/user management; these are not 
+accessible to investigators. 
+ 
+c. How are participants recruited? 
+Participants are recruited through the Gorilla platform (Cauldron Science Ltd., UK) and 
+associated online research panels. 
+● Recruitment materials briefly describe: study purpose, procedures, time 
+commitment, inclusion criteria, compensation, and data protection. 
+● Screening and eligibility assessments occur online. 
+● Only eligible individuals who provide informed consent may proceed to the baseline 
+session. 
+● Participation is entirely voluntary, and declining participation has no disadvantages. 
+ 
+d. How are participants being informed prior to the assessment? Please attach all the information 
+material to the application. 
+Participants receive a detailed online information sheet and consent form on Gorilla before 
+any study procedures begin. The information covers: 
+● Study aims and background in lay language 
+● What participation involves (baseline session and 12-day intensive phase; number 
+and duration of sessions) 
+● Types of data collected (cognitive performance, speech recordings, derived speech 
+features, self-reports, smartphone/context signals) 
+● How data are processed and stored, including temporary storage on Gorilla servers 
+and final storage on Leonhard Med (ETH Zurich secure infrastructure) 
+● The special status of voice recordings as potentially re-identifiable biometric data 
+● Possible risks (mild fatigue, privacy risks) and measures taken to minimise them 
+● Voluntary nature of participation; right to withdraw at any time without negative 
+consequences 
+● Options for requesting deletion of data up to a defined cutoﬀ date 
+● Contact details for the research team  
+The information sheet and consent form will be attached to the application. 
+ 
+e. How is the study carried out from the point of view of the participants? Please describe in a 
+separate document and attach to the application. 
+A separate document will be attached, but below is the full text you should include. 
+From the participantʼs perspective: 
+1. Baseline Session (Day 0) 
+– Completed on their smartphone (~25–30 minutes). 
+– Includes extended cognitive tasks (TestMyBrain), a short speech task, 
+sleep/chronotype questions, and device calibration. 
+2. Daily Sessions (Days 1–12) 
+– Three sessions per day (morning, afternoon, evening). 
+– Each lasts approximately 5–7 minutes. 
+– Procedure for each session: 
+1. Brief self-report survey (mood, stress, context, alertness, attention). 
+2. Speech task (60–90 seconds; picture description and semi-structured 
+QA/narrative prompt). 
+3. Short mobile cognitive tasks (TestMyBrain). 
+4. A brief post-session question about interruptions and experience. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 3   |   40  
+
+--- PAGE 4 ---
+ 
+3. Notifications 
+– Participants receive reminders within each time window but may complete sessions 
+flexibly. 
+4. Completion and Withdrawal 
+– Participants may stop participating at any time without penalty. 
+– They may request deletion of their data within the predefined cutoﬀ date. 
+ 
+f. What are the exact instructions during the study? Which questionnaires are being used? Please 
+state the verbatim instructions, the tasks or questionnaires and attach to the application. 
+All task instructions, prompts, and verbatim questionnaire items will be attached in a 
+separate document titled “Survey Items, Task Instructions, and Prompts (Full Verbatim Set)”. 
+This includes: 
+● Speech task instructions (picture-description scenes and semi-structured 
+QA/narrative prompts) 
+● TestMyBrain task instructions (Choice RT, GradCPT, Digit Symbol Matching, MOT) 
+● All survey items with exact wording: 
+o PANAS Short Form 
+o Daily Inventory of Stressful Events 
+o Social Functioning Scale 
+o Anxiety and Depression scale items 
+o Alertness item 
+o Contextual items 
+o Attentional items 
+o Interruptions item 
+● Baseline demographics and sleep questions 
+● Example logic for contingent items (e.g., follow-up questions triggered by specific 
+responses) 
+All questionnaires are standard validated measures or minor adaptations suitable for EMA. 
+ 
+g. How are participants being informed after the data acquisition? What is reported back? Please 
+attach to the application in a separate document. 
+At the end of their participation, participants see a debriefing page on the study platform. It 
+includes: 
+● A lay summary of the studyʼs purpose (investigating how cognition fluctuates over 
+time and how speech/context can help predict these fluctuations) 
+● Clarification that the study is not diagnostic and that individual scores should not be 
+interpreted as medical or psychological assessments 
+● A reminder of how their data are stored, how long they are kept, and under what 
+conditions they may be shared for research 
+● Information about how to contact the research team if they have questions or wish to 
+request deletion of their data (within the defined cutoﬀ) 
+● Information about where a lay summary of results will be posted once the study is 
+completed (e.g. a project webpage) 
+We do not give individual clinical feedback or interpretations of cognitive performance.  
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 4   |   40  
+
+--- PAGE 5 ---
+ 
+ 
+3. Specific Ethical Aspects of the Project 
+a. Did you check "yes" to one or more items on the self-assessment checklist? If yes, please briefly 
+describe any risks associated with the study.  
+No. 
+All items on the self-assessment checklist were answered with “No”.  
+  
+b. Is participation remunerated or are participants otherwise compensated? If yes, in what form and 
+how much? 
+Yes. 
+Participants are compensated proportionally to the time they spend in the study. The overall 
+participation time is approximately four hours across the baseline session and the 12-day 
+protocol. Compensation is set at about CHF 24 per hour. Participants receive CHF 10 for the 
+baseline session and CHF 2.50 for each daily session (around 5–7 minutes), which yields a 
+maximum of CHF 100 if all scheduled sessions are completed. All payments are prorated, so 
+participants are compensated for every session they complete, and there are no completion 
+bonuses or performance-linked incentives. 
+c. If participation is undertaken for academic course credit (e.g. mandatory test subject - hours) is it 
+possible to obtain the course credit in alternative ways? 
+Not applicable. Participation is not undertaken for course credit. 
+d. Is the voluntary nature of participation through informed consent ensured? Please attach the 
+consent form to the application. 
+Yes. 
+Participation is entirely voluntary. Informed consent is obtained via an online consent form 
+prior to any data collection. The consent form: 
+● Explains the purpose, procedures, risks, and benefits 
+● Describes the types of data collected and the data protection measures 
+● States clearly that participation is voluntary and that participants may withdraw at 
+any time without negative consequences 
+● Describes how to request deletion of data up to a defined cutoﬀ date 
+ 
+e. Are there any disadvantages for possible participants if they donʼt partake in the study? If yes, 
+specify. 
+No. 
+There are no penalties, loss of benefits, or other disadvantages for individuals who choose 
+not to participate or who withdraw from the study. 
+ 
+f. Is it possible for participants to withdraw their participation at any given time without any 
+explanations without having to bear any negative consequences? 
+Yes. 
+Participants can stop participation at any time without providing a reason and without 
+negative consequences. They may simply stop completing sessions and/or contact the 
+research team to request withdrawal. Within the defined timeframe, they may request 
+deletion of their data. 
+ 
+g.  For participants aged 14-18 years: Is written consent obtained from their legal guardian? If Yes, 
+please submit consent form. If no, for what reason? 
+Not applicable.  
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 5   |   40  
+
+--- PAGE 6 ---
+ 
+h. Is participation of persons with limited capacity/ incapability of judgment or the participation of 
+minors possible or intended? If yes, please clarify: 
+No. 
+i. Will participants be members of a context, platform, or population with its own culture, norms, 
+and/or guidelines? If so, how does the research design align with the culture, norms, and/or 
+guidelines, and how would the research team collaborate with and involve representatives from 
+the context, platform, or culture in the research?  
+Participants are recruited via online platforms (e.g. Gorilla panels) that have their own terms 
+of use and community guidelines. The study complies with these terms by: 
+● Using recruitment materials that are transparent and non-deceptive 
+● Ensuring voluntariness and fair compensation 
+● Respecting platform rules on contacting participants and using data solely for 
+research purposes 
+No specific subculture or sensitive online community is targeted. The study does not involve 
+covert observation or interventions within platforms; all interactions are explicit, 
+consent-based, and in line with platform policies. 
+ 
+j. Are participants exposing themselves to a risk that requires insurance coverage? If yes, what is 
+the risk and what insurance coverage has been taken out? Please attach any potential insurance 
+documents.  
+No. 
+The study involves minimal risk, non-invasive behavioural procedures. 
+ 
+ 
+4. Strains During the Assessment 
+a. Will the physical integrity of participants be aﬀected (e.g. by taking drugs, having blood samples 
+taken)? Is there a possibility for adverse eﬀects (e.g. headache)? If yes, please clarify. 
+No. 
+The study does not involve drugs, blood sampling, or any invasive procedures. Participants 
+interact with their smartphone, complete cognitive tasks, and speak into the microphone. 
+Physical strain is limited to everyday screen use and short periods of concentration, which do 
+not go beyond common daily activities. 
+ 
+b. Will the psychological integrity of participants be aﬀected (e.g. ability to concentrate, induction 
+of negative emotions)? Is there a possibility of adverse psychological eﬀects? If yes, please clarify. 
+Only minimally. 
+The cognitive tasks and repeated sessions may induce mild, short-term fatigue or frustration 
+(for example, if participants feel they performed poorly). These eﬀects are expected to be 
+brief and within the range of everyday experiences (“minimal risk”). To mitigate these: 
+● Sessions are short (approx. 5–7 minutes). 
+● Participants are free to skip or end sessions at any time. 
+● We collect brief feedback on discomfort. 
+No negative emotion induction, trauma recall, or highly sensitive topics are used. 
+ 
+c. Will participation aﬀect the social integrity (e.g. participation contributes to a bad reputation)? Is 
+there a possibility for adverse social eﬀects? If yes, please clarify. 
+No. 
+The study is completed individually on personal smartphones, without group interactions or 
+public display of performance. Participation is not made visible to others by the research 
+team. The procedures are unlikely to produce adverse social eﬀects or reputational harm. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 6   |   40  
+
+--- PAGE 7 ---
+ 
+ 
+d. If any one question 4a-c has been answered with yes, do the strains or consequences go beyond 
+what can be considered an everyday occurrence (“minimal risk”)? 
+No. 
+Any expected strains remain within the range of minimal risk comparable to everyday 
+activities (e.g. using smartphone apps, doing short mental tasks). 
+ 
+e. If question 4d has been answered with yes, please explain your course of action and specify the 
+protective measures for the participants:       
+f.  Will participants be asked to disclose personal experiences (e.g. stressful experiences), sensitive 
+information (e.g. sexual behavior, drug use) or attitudes (e.g. political preferences)? If yes, please 
+clarify:  
+No. 
+Participants are not asked to report specific stressful incidents, traumatic experiences, illegal 
+behaviour, sexual behaviour, political or religious attitudes, or other particularly sensitive 
+personal information. The speech prompts and questionnaires focus on general patterns of 
+everyday life (for example, typical situations that make it easier or harder to concentrate, 
+usual strategies for planning or remembering, and general mood or energy). Responses can 
+be kept very general, and participants may skip any question or stop participation at any 
+time. 
+ 
+ 
+g. Will participants be deliberately misinformed or falsely informed (with the intent to deceive) 
+about the goals and the execution of the project (e.g. by manipulated feedback about their 
+performance)? If yes, please clarify (especially the debriefing): No. 
+The study does not use deception. Participants are informed accurately about the goals and 
+procedures of the project. No manipulated feedback about performance is provided. 
+ 
+h. Will it be necessary for people to partake in the study without knowing so and without 
+previously having given informed consent (e.g. covert observation of people in non-public spaces)? 
+No. 
+All participants provide informed consent before taking part. No covert observation or data 
+collection from non-consenting individuals is conducted 
+ 
+ 
+5. Specifications Regarding Data Protection 
+a. Are picture, film or audio recordings or any other type of behavior recordings intended? 
+Yes. 
+Audio recordings of participantsʼ speech are collected during 60–90 second speech prompts at 
+each session. No images or video are recorded.  
+ 
+b. How are the acquired data anonymized? 
+The data are stored and processed in pseudonymised form: 
+● At enrolment, each participant is assigned a pseudonymous study ID by the Gorilla 
+platform. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 7   |   40  
+
+--- PAGE 8 ---
+ 
+● All research data (cognitive performance, speech recordings, derived speech features, 
+questionnaires, context signals) are stored only under this study ID, without names, 
+email addresses, IP addresses, or other direct identifiers. 
+● Participant contact details (e.g. name, email, payment details) needed for account 
+management, panel management, or compensation are handled exclusively by Gorilla 
+(Cauldron Science Ltd., UK), in line with Gorillaʼs privacy policy and Data Processing 
+Agreement. 
+○ These contact data are stored in Gorillaʼs own systems, under Gorilla account 
+IDs, and are not exported to the research team. 
+○ The technical linkage between Gorilla account/contact data and our study ID 
+remains within Gorillaʼs infrastructure and is not accessible to the 
+investigators. The research team does not create or hold any separate linkage 
+file that could connect study IDs to identifiable contact information. 
+Because speech recordings are inherently re-identifiable biometric data, the dataset 
+cannot be considered fully anonymised under data protection law. We therefore treat 
+all research data as pseudonymised personal data and apply appropriate technical 
+and organisational safeguards (secure transfer, encryption at rest, access control on 
+Leonhard Med). 
+ 
+c. How is the confidentiality of the data ensured? 
+Confidentiality is ensured through technical and organisational measures at all stages of data 
+handling: 
+● Secure transfer: All data transmitted from Gorilla (Cauldron Science Ltd., UK) to 
+Leonhard Med (ETH Zürich) are transferred via TLS-encrypted connections. 
+● Secure storage: Final storage and all analyses take place exclusively on Leonhard Med, 
+a secure research infrastructure operated by ETH Zürich, which provides encryption at 
+rest, audited access procedures, and institutional data-protection compliance. 
+● Access control: Access to study data is restricted to authorised project staﬀ via 
+role-based access control; all access is logged. No external party has access to the 
+research dataset. 
+● Backups and security checks: Leonhard Med performs regular backups, monitoring, 
+and security audits to ensure data integrity and continuity. 
+● Temporary storage on Gorilla: 
+Gorilla temporarily stores the pseudonymised research data generated during each 
+session only for the time needed to ensure successful transfer to Leonhard Med. 
+○ According to Gorillaʼs retention policy and Data Processing Agreement, 
+research data are automatically deleted from Gorillaʼs servers once transfer 
+has been confirmed, and in any case no later than 30 days after collection. 
+○ Participant contact information required for account and panel management 
+remains held by Gorilla and is not shared with the research team. 
+● No data is shared openly.  
+ 
+d. Is it possible for participants to ask for their data to be deleted anytime? 
+Yes, within defined limits. 
+Participants are informed that they can request deletion of their data up to 30 days 
+after completing their final study session (as specified in the information sheet and 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 8   |   40  
+
+--- PAGE 9 ---
+ 
+consent form). Within this period, we will delete their pseudonymised records from the 
+research database, as far as technically and legally feasible. After this point, complete 
+deletion may no longer be possible if data have been irreversibly anonymised or 
+already used in aggregated analyses. 
+ 
+e. Will acquired data be partially or completely deleted after the expiration of a specific time 
+period? 
+Yes. Deletion occurs at several defined stages: 
+● Temporary storage on Gorilla: 
+Research data collected through Gorilla are stored only until they have been 
+successfully exported to Leonhard Med. 
+○ After the research team verifies successful transfer, Gorilla deletes the 
+corresponding datasets according to its deletion policy. 
+○ Regardless of transfer timing, Gorillaʼs systems automatically delete research 
+data no later than 30 days after collection. 
+● Storage on Leonhard Med: 
+On Leonhard Med (ETH Zürich), pseudonymised research data are retained for the 
+duration of the project. 
+● All raw recordings will be deleted at the end of the project, after completion of all 
+primary analyses. 
+○ No raw data will be shared, published, or deposited in any public or 
+collaborative repository. 
+ 
+ 
+f. Do you plan to publish the data on a public data repository such as the Open Science 
+Framework? 
+No 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 9   |   40  
+
+--- PAGE 10 ---
+ 
+6. Submission of Application 
+ 
+Please upload the completed and signed application form together with the other application 
+documents as one single pdf-file on OLAT. 
+ 
+Prof. Dr. Christopher Hopwood 
+University of Zurich 
+Institute of Psychology, P.O. Box 34 
+Binzmühlestrasse 14 
+CH-8050 Zürich 
+chair.ethics.committee@phil.uzh.ch 
+ 
+ 
+7. Place, Date and Signature of Applicant 
+ 
+Place 
+ 
+  Zurich 
+ 
+Date 
+ 
+  26 November 2025 
+ 
+Signature 
+ 
+ 
+ 
+_______________________________ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 10   | 
+40  
+
+--- PAGE 11 ---
+ 
+ 
+ 
+ 
+  
+ 
+  
+Checklist to Self-Assess Studies Concerning Their Ethical Safety 
+ 
+Each person responsible for a study should fill out this checklist before data acquisition and decide, based on 
+the outcome(s), if an application for registration to the Ethics Committee is necessary. 
+ 
+Title of the Study: M-CAMPUS: Mobile cognition, speech, and context in everyday life 
+ 
+Principal Investigator (more than one possible): Prof. Michael Krauthammer, Department of Quantitative 
+Biomedicine, University of Zurich 
+ 
+Responsible Person: Dr. Morteza Rohanian, KrauthammerLab, Department of Quantitative Biomedicine, 
+University of Zurich 
+ 
+  
+ 
+ Ja Nein 
+1. Is there a possibility of disadvantages resulting for participants either through their 
+behavior during the study or through their responses being recorded (e.g. political 
+preferences in non-democratic countries)? 
+ 
+ ☐ ☒ 
+2. Are there any potential disadvantages to not participating in the study? 
+ 
+ ☐ ☒ 
+3. Is participation of persons with limited capacity/incapability of judgment or the 
+participation of minors possible or intended? 
+ 
+ ☐ ☒ 
+4. Will it be necessary for people to partake in the study without consciously knowing so 
+and without previously having given informed consent (e.g. covert observation of 
+people in non-public spaces)? 
+ 
+ ☐ ☒ 
+5 Will participants be deliberately misinformed or falsely informed about the goals and 
+execution of the project (e.g. by manipulated feedback about their performance)?  
+ 
+ ☐ ☒ 
+6 Will participants be asked to disclose personal experiences (e.g. stressful incidents), 
+sensitive information (e.g. sexual behavior, drug use, or attitudes/opinions that could 
+put participants at risk if made public)? 
+  
+ ☐ ☒ 
+7 In case the physical integrity of participants is aﬀected (e.g. by taking drugs, giving 
+blood samples): Is there a possibility for adverse eﬀects?  
+ 
+ ☐ ☒ 
+8 In case the psychological integrity of participants is aﬀected (e.g. ability to 
+concentrate, induction of negative emotions): Is there a possibility of adverse 
+psychological eﬀects? 
+ ☐ ☒ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 11   | 
+40  
+
+--- PAGE 12 ---
+ 
+ 
+9 In case the social integrity of participants is aﬀected (e.g. group experiments): Is it 
+possible for participation to cause adverse eﬀects on the social level (e.g. reputation 
+damage)? 
+ 
+ ☐ ☒ 
+10 In case the participants are members of a context, platform, or population with its 
+own culture, norms, and/or guidelines: Are there any concerns whether the research 
+aligns with local expectations and norms? 
+ 
+ ☐ ☒ 
+11 
+ 
+ 
+12 
+Is there an additional financial incentive oﬀered next to the usual compensation for 
+participation in the study? 
+ 
+Does the research funding body, law, or the journal you intend to submit this research 
+to require a registration from an ethics committee? 
+ ☐ 
+ 
+ 
+☐ 
+ 
+☒ 
+ 
+ 
+☒ 
+ 
+     
+13 Has the study already been submitted to an ethics committee for assessment? 
+ 
+Name of the committee:       
+Date of submission:       
+File reference number of registration (if known):       
+ 
+ ☐ ☒ 
+In case of “yes”-answers to any one question 1 through 12, it is mandatory to submit an application for 
+registration of the study to the Ethics Committee. 
+Explanatory Comments on the Questions 
+Question 1: In cases where responses could put participants at risk (e.g., making controversial political views 
+public in countries where political persecution is possible), it is important to be sure participants are fully 
+protected in terms of data security, confidentiality, and related issues. In cases like these in which anonymity 
+and data security are not fully assured because of the study design and research infrastructure, review may be 
+necessary.   
+Question 2: In cases where there are dependent relationships between researchers and students (e.g., 
+students who are employed by or graded by members of the research team), it is important to be sure that no 
+negative consequences could arise due to participation or decisions not to participate (e.g., negative 
+employment evaluations or worse grades). In cases like this, there should be a reasonable alternative to study 
+participation and, when practicable, anonymity with respect to this choice in relation to people with power 
+such as employers or instructors.  
+Question 3: Examples for persons of limited capacity of judgment are children, mentally disabled people or 
+people suﬀering from dementia or other psychiatric illnesses. 
+Question 4: This question refers to studies that observe or experimentally influence the behavior of people 
+without their knowledge (for example in field studies or observations of people in non-public spaces). 
+Question 5: This question refers to studies that deliberately deceive participants (“deception”). That means 
+that participants are purposefully misinformed or falsely informed about integral aspects of the study 
+concerning them, such that they would reasonably perceive themselves as having been lied to once they find 
+out the truth. Among other things, this can include incorrect feedback about their performance, incorrect 
+information about the goals of the study, interactions with a co-worker of the researcher who is falsely 
+introduced as “another study participant”. This question does not refer to the fact that usually study 
+participants arenʼt fully informed about the scientific background or the hypotheses of a study. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 12   | 
+40  
+
+--- PAGE 13 ---
+ 
+Question 6: This question refers to data acquisition that is sensitive due to one of two reasons. On the one 
+hand, itʼs about information that needs to be treated highly confidentially because its distribution could lead 
+to disadvantages for the person. On the other hand, itʼs about disclosed information that can be connected 
+with strong emotions for the person (e.g. traumatic experiences) in a way that could cause the assessment to 
+be an unacceptable emotional strain. 
+Question 7: This question refers to physical interventions, for example taking drugs (including alcohol) as well 
+as invasive measures like taking blood samples, injection of contrasting agents. Unproblematic physical 
+interventions are things like drinking non-alcoholic beverages, moderate exercise, measuring blood pressure. 
+Question 8: Just as in question 7, itʼs about distinguishing between negative and neutral consequences of the 
+intervention. For example mood induction with happy or sad music is harmless because this type of music is 
+common in everyday life and no adverse eﬀects are to be expected. What would be disquieting or disturbing 
+would be showing images of war or mutilation – itʼs true that those types of pictures can also be found in 
+everyday life but usually one is not forced to look at them and they can be cause for very strong emotional 
+reactions. 
+Question 9: Not every group experiment is ethically questionable but under certain conditions group 
+experiments can possess a risk of placing people in uncomfortable situations, for example if an experiment 
+creates a competitive situation in which individual participants will clearly lose, if aggression is induced, or if 
+people consider the situation to be embarrassing. Just like in the two previous questions, here one must also 
+draw a line between a small discomfort which can be considered comparable to an everyday occurrence and 
+thus acceptable (e.g. nervousness some people always feel when talking in front of a group) and a discomfort 
+that oversteps the boundary of what can be considered acceptable (e.g. being yelled at). 
+Question 10: In cases where participants are sampled from certain contexts, such as underrepresented 
+groups, regions of the world with very diﬀerent cultures than those of Switzerland and/or the research team, 
+or social groups or online platforms with specific internal rule and expectation, it is important that researchers 
+conduct studies in a way that consider the culture, norms, and expectations of those contexts. This will often 
+involve collaborating with representatives of such contexts in the research plan. There are situations in which 
+research can cause harm to social groups or society at large even when it generally respects the rights of 
+individual participants (e.g. “parachute science”), and in this possibility needs to be carefully considered in 
+research with participants in these kinds of contexts. This does not necessarily mean that researchers must 
+always adhere to all specific local guidelines, but the ethical implications of any deviations need to be carefully 
+considered and justified. 
+Question 11: Here the distinction is to be made between the standard compensation for a respective field of 
+research for study participation and a financial incentive used specifically in the study to reach a certain goal of 
+the study (e.g. particularly high performance motivation). 
+Question 12: If a research funding body, the journals to which the researcher tends to submit the results of the 
+study, or the law requires an ethical review/and or registration, we can provide a review even for studies that 
+would otherwise be exempt.   
+Question 13: This question refers to ethics committees other than the one of the Faculty of Philosophy, e.g. 
+out-of-canton ethics committees involved in multi-centered studies. 
+In general: If in doubt, consult a member of the Ethics Committee of the Faculty of Philosophy. 
+ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 13   | 
+40  
+
+--- PAGE 14 ---
+ 
+Protocol  
+ 
+Administrative information  
+Title: A within-subject mobile study testing whether speech and smartphone-captured context predict momentary 
+cognitive performance, using cognitive tasks in naturalistic environments. 
+Structured summary: This is a fully remote, 12-day, within-subject trial delivered on participants’ own 
+smartphones. Each day, three short sessions (morning, afternoon, evening) are completed in naturalistic settings. 
+Each session consists of: (1) a brief state/context survey, (2) a 60–90 s speech prompt via the study web app, (3) 
+short-form TestMyBrain (TMB) cognitive tasks, and (4) a feedback item. 
+The primary objective is to test whether speech features can be used to predict momentary cognitive 
+performance, specifically task accuracy and reaction time (RT). Predictors include speech features and 
+smartphone/context signals (ambient noise proxy, interruptions, device type, headphone use, self-reported stress, 
+fatigue, time of day).  
+Recruitment and task delivery occur via Gorilla (Cauldron Science Ltd., UK), which provides temporary 
+encrypted storage before secure transfer to Leonhard Med (ETH Zürich). Data are pseudonymized, with no direct 
+identifiers accessible to investigators; voice recordings remain inherently re-identifiable. Security measures 
+include TLS-encrypted transfer, encryption at rest, role-based access, and daily backups. Gorilla is the only 
+sub-processor and provides a Data Processing Agreement and deletion policy. Final storage and analysis occur 
+exclusively on Leonhard Med under ETH/UZH retention and compliance policies. 
+Protocol version: Version 0.1 — 16 Sep 2025. 
+ 
+Introduction  
+Background & rationale: Intensive longitudinal work shows substantial within-person variability in cognition 
+over short time scales; key drivers include time of day and internal/external states. Single snapshots can mislead. 
+Delivering tasks on smartphones in naturalistic contexts lets us both measure performance and observe context 
+that predicts it (noise, interruptions), while speech may index these states in real time. TMB provides validated, 
+mobile-ready tasks and trial-level data suitable for unsupervised testing 
+  
+Objectives: 
+1. Primary: Predict momentary cognitive performance (accuracy, RT) from concurrent speech features, 
+beyond age, person-mean baseline, time of day, and self-reported states. 
+2. Decompose trait (between-person) vs state (within-person) variance in performance, speech, and context 
+indices. 
+3. Quantify how smartphone/context signals (ambient noise proxy, interruptions, location type, 
+stress/fatigue) predict momentary cognition and interact with speech. 
+4. Compare global vs person-specific predictive models. 
+Co-primary predictive endpoint: Adding speech features improves out-of-sample prediction of momentary 
+performance over a baseline without speech (median ΔRMSE ≥3% for RT or ΔAUC ≥0.03 for accuracy; blocked 
+CV by day). 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 14   | 
+40  
+
+--- PAGE 15 ---
+ 
+Patient and public involvement 
+Healthy-adult volunteer advisors will review consent wording, burden, and app usability (think-aloud pilot N≈n). 
+Post-study, we will return findings in lay language and solicit feedback to refine prompts and notification 
+windows.  
+ 
+Trial design 
+Within-subject design across 12 days (3 sessions/day; morning/afternoon/evening windows). Each daily session 
+follows a fixed sequence: (1) brief state/context survey, (2) 60–90 s speech prompt via the study web app to elicit 
+a verbal response (picture description and QA/narrative prompt), (3) short-form TMB cognitive tasks, and (4) 
+AE/feedback item. Thus, these tasks are administered three times per day during Days 1–12. 
+ 
+Participants, interventions, outcomes  
+Trial setting: Fully remote; participants complete sessions on personal smartphones, wherever they are (home, 
+work, transit—if safe). 
+Eligibility: 18–70; fluent in study language (English); smartphone with mic; internet; consent. 
+Exclusion: Neurological disorders; major uncorrected speech/hearing impairment; acute psychiatric crisis. 
+Personnel/site criteria: N/A (remote self-administered). Study staff trained in remote consent and QC. 
+Intervention & comparator: 
+·       Modification/discontinuation: If participant reports discomfort or fails audio QC (excessive 
+loudness), reduce intensity or abort session. 
+·       Adherence strategies: 3 daily randomized prompts within windows; push/email reminders; 
+micro-break guidance. 
+·       Concomitant care: No restrictions; participants instructed not to complete tasks while 
+driving/operating machinery. 
+Primary outcomes: Task accuracy and reaction time (RT) from TMB tasks per session. The primary objective is 
+to test whether adding speech features improves prediction of accuracy and RT compared to models without 
+speech features. 
+Predictors/covariates: 
+● Speech features: rate; pause metrics; disfluencies; prosodic variability; lexical diversity; syntactic 
+complexity; semantic coherence (captured via 60–90 s smartphone speech prompt before tasks). 
+● Smartphone/context signals: 
+○ Ambient noise proxy & SNR from a brief mic calibration (Web Audio API; device-relative, not 
+absolute dB). 
+○ Headphone use, device type/OS, network quality (where supported). 
+○ Self-reports: current stress, fatigue, mood, caffeine; location type; “noise around you” slider; 
+perceived interruptions. 
+● Time factors: exact time, time-of-day (cosinor), day in study. 
+Secondary outcomes: Adherence, usability/burden, audio quality (SNR/clipping). 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 15   | 
+40  
+
+--- PAGE 16 ---
+ 
+Harms: Minimal risk. Potential transient discomfort (fatigue, frustration), privacy concerns (voice). Collect 
+unsolicited adverse events via end-session query; suppress audio intensity if discomfort reported; allow immediate 
+skip/stop; provide support contacts.  
+Participant timeline: 
+·       Day 0 (Baseline; ~25–30 min, smartphone): Extended TMB modules for trait anchors; 2–3 min 
+picture description + narrative; device/mic calibration. 
+·       Days 1–12 (3×/day; ~5–7 min): State survey → 60–90 s speech → short-form TMB  → 
+AE/feedback item. 
+Sample size: Target N=120; 36 scheduled sessions/participant; assume 75% adherence → ~27 
+sessions/participant (~3,240 sessions). This density provides power for small within-person effects typical for 
+intensive longitudinal designs. 
+Recruitment: Gorilla, with age-band stratification. Smartphone-only eligibility enforced at screener. 
+ 
+Data collection, management, and analysis  
+Data collection methods: 
+● Cognitive tasks: TestMyBrain (TMB) modules delivered via TMB CogSci Toolkit / Digital 
+Neuropsychology Toolkit with trial-level exports (validated for unsupervised, cross-device—including 
+smartphones). We will select: 
+o   TMB_ChoiceRT (TMB Choice Reaction Time) (~60–75 s) 
+o   TMB_GradCPT (TMB Gradual Onset Continuous Performance Test ) (short block, ~90 
+s) 
+o   TMB_DigitSymbolMatching (TMB Digit Symbol Matching) (~75–90 s) 
+o   TMB_MOT (TMB Multiple Object Tracking) (short block, ~90 s) 
+● Speech capture (study app): 16 kHz+ PCM via smartphone mic; 60–90 s prompts (picture description, 
+short narrative, guided recall). 
+○ Picture-description stimuli: Participants complete 36 picture-description prompts across the 
+12-day protocol (3 per day). The stimulus set consists of 12 unique line-drawing scenes 
+(kitchen, living room, outdoor market, park picnic, café, street/crosswalk, playground, birthday 
+party, office, supermarket aisle, beach scene, train station). Each scene appears exactly three 
+times per participant in randomized order with constraints preventing adjacent repeats. All 
+images are custom-drawn, copyright-free line illustrations matched for visual complexity (2–4 
+characters, 8–12 objects, 2–3 simultaneous actions) and optimized for smartphone display. 
+○ QA/narrative prompts: Non-picture prompts are drawn from a standardized bank of short 
+semi-structured interview questions. These prompts are designed to elicit 60–90 s of 
+spontaneous speech under naturalistic conditions. Items are randomly sampled without fixed 
+repetition constraints and do not involve visual stimuli. 
+● Context sensing (study app): 
+○ Ambient noise proxy & SNR estimate (brief calibration clip; device-relative). 
+○ Page visibility/foreground events (interruptions counts/durations). 
+○ Device metadata (OS, viewport), network info where available. 
+○ Self-reports (stress/fatigue/noise/location/caffeine). 
+● Quality controls: Min speech length ≥30 s; VAD speech fraction ≥50%; headphone prompt; RT range 
+checks; anti-cheat (hidden attention checks in survey items). 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 16   | 
+40  
+
+--- PAGE 17 ---
+ 
+● Retention: 3 notifications/day; flexible windows; brief sessions. 
+Data management: 
+·       Flows: TMB exports trial-level task data to secure storage under a pseudonymous study ID; the study 
+app stores speech/context data under the same ID, with nightly ID-level merges. Speech recordings and 
+context data are uploaded securely (TLS-encrypted) to Gorilla.sc (Cauldron Science Ltd., UK), which 
+provides temporary storage only. From Gorilla, all pseudonymised research data (speech, surveys, 
+TMB exports) are transferred to Leonhard Med (ETH Zürich secure servers), where final storage and all 
+analyses take place. After the research team verifies successful transfer, Gorilla deletes the 
+corresponding datasets, and in any case automatically deletes research data no later than 30 days after 
+collection. 
+  
+·       Security measures: TLS-encrypted transfer; encryption at rest on Leonhard Med (ETH Zürich); 
+role-based access; audit logs; daily backups. 
+1.     Handling of personal data: Pseudonymized IDs only; no direct identifiers collected; 
+Gorilla may retain participant contact info for recruitment/consent but this is not shared with 
+investigators. 
+2.     Sub-processors: None beyond Gorilla.sc (Cauldron Science Ltd., UK), which acts as the 
+sole external processor. 
+3.     Data breach notification: Gorilla commits in its Data Processing Agreement (DPA) to 
+notify controllers promptly of any data breaches. ETH Zürich and UZH also follow institutional 
+data breach reporting procedures. 
+4.     Data retention: Gorilla stores pseudonymised research data only until transfer to 
+Leonhard Med is confirmed, and in all cases deletes research datasets within 30 days of 
+collection. Final research data are stored on Leonhard Med for the duration of the project. All 
+raw audio recordings are deleted at the end of the project, after completion of primary 
+analyses; only derived, non-audio speech features and other de-identified variables may be 
+retained long-term. 
+5.     Compliance: Gorilla operates under GDPR/UK data-protection law and provides a Data 
+Processing Agreement. Leonhard Med is a secure ETH Zürich research infrastructure compliant 
+with Swiss data-protection requirements. The project undergoes the required UZH 
+self-assessment and DSFA to document compliance with institutional and legal standards. 
+  
+Statistical methods: 
+● Preprocessing: Exclude failed-QC sessions; winsorize RTs within participant; log-RT; standardize 
+features within folds; impute missing self-reports within folds. 
+● Variance decomposition: Multilevel models (random intercepts by participant; random slopes for time 
+of day/context) to estimate trait vs state variance components (ICCs) for performance, speech, and 
+context indices. 
+● Primary (concurrent prediction): 
+○ GLMM (accuracy) / LMM (log-RT): age + person-mean performance + time of day + 
+self-reports + device + ambient noise proxy + context interruptions + speech feature vector. 
+○ Evidence: Δ marginal R² when adding speech (and context) to a baseline model; LR tests. 
+● Predictive (co-primary): 
+○ Blocked CV by day. Compare M0 (age + person-mean) vs M1 (M0 + states + context) vs M2 
+(M1 + speech). 
+○ Metrics: RT → RMSE/MAE; Accuracy → AUC/Brier + calibration (ECE). 
+○ Success: median ΔRMSE ≥3% or ΔAUC ≥0.03 (M1→M2) with bootstrap 95% CI > 0. 
+● Context effects: Quantify unique contributions of ambient noise proxy and interruptions (and 
+interactions with speech). 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 17   | 
+40  
+
+--- PAGE 18 ---
+ 
+● Temporal/forecasting: Lagged models (speech_t, context_t ⇒ performance_t+1 controlling 
+performance_t). 
+● Analysis set: All sessions passing QC; participant excluded only if <20% sessions completed. 
+● Missing data: ML estimation in mixed models; sensitivity with multiple imputation for state/context 
+covariates. 
+● Additional analyses: Domain-specific couplings; heterogeneity (random slopes); moderation by age and 
+baseline trait (from Day-0 TMB anchors). 
+ 
+Monitoring  
+Data Monitoring Committee & interim analyses: No independent DMC (minimal-risk, behavioral). Interim 
+looks limited to adherence/quality metrics—not outcomes—and used only to adjust reminders/incentives.  
+Trial monitoring: Weekly checks of adherence, QC failure rates, dropout; automated alerts for anomaly spikes 
+(e.g., RT implausible uniformity). Amendments follow governance below.   
+ 
+Ethics  
+REC approval: We will seek an ethics determination from UZH. Similar healthy-adult cognition studies may be 
+exempt/low-risk, but we will obtain formal approval/waiver before enrollment. Conduct the UZH self assessment. 
+Draft a DSFA (separate or as part of the UZH self assessment) to document that the privacy risk is low. 
+Consent/assent: Remote e-consent with comprehension checks. Consent includes audio recording, data 
+use/sharing, withdrawal, and optional future use of de-identified features. No biological specimens. 
+Confidentiality: Pseudonymous IDs; any linkage between contact details and study IDs is held only by Gorilla 
+(not by the research team); secure Swiss/EU servers; GDPR/FADP compliant; voice data protected as potentially 
+re-identifiable. The research team does not collect or store direct identifiers (e.g., names, email addresses) and 
+does not maintain a Verknüpfungsdatei. Recruitment and consent are managed via Gorilla, which may retain 
+participant contact details separately. The study dataset available to investigators is pseudonymized (IDs only). 
+Given that voice data are inherently re-identifiable biometric data, the dataset cannot be considered anonymized 
+under Swiss law. Thus, re-identification would require extraordinary means (voice matching) and is not possible 
+through direct identifiers. 
+Ancillary & post-trial care: Not applicable (minimal risk). Participants may contact the team to remove their 
+data up to a defined cutoff. 
+ 
+Operational details 
+Platform stack: 
+● Cognitive tasks: TestMyBrain (TMB CogSci Toolkit / Digital Neuropsychology Toolkit) with 
+trial-level exports and transparent scoring; built for remote + smartphone use. 
+● Recruitment: Gorilla (quality remote panels). 
+● Study web app: lightweight layer for consent, speech capture, context sensing, and session 
+orchestration; redirects to/from TMB with participant token to link datasets. 
+● Why TMB: Open tests/datasets, validated psychometrics, cross-device compatibility, and very large 
+prior research base. 
+Success criteria (pilot): 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 18   | 
+40  
+
+--- PAGE 19 ---
+ 
+● Predictive co-primary met: speech improves out-of-sample prediction (median ΔRMSE ≥3% or ΔAUC 
+≥0.03 vs baseline without speech). 
+● Context aim met: ambient noise proxy and/or interruptions independently predict performance after 
+controls (p<.05), and improve predictive metrics. 
+●  ≥70% median adherence; ≥60% audio-QC pass. 
+Timeline: Build/internals (4–6 weeks) → Ethics/registration (2–4 weeks) → Data collection (8 weeks rolling) → 
+Analysis/reporting (4–6 weeks). 
+ 
+ 
+Time point Enrol
+l 
+Baseline Day 0 (TMB 
+anchors + speech) 
+Days 1–12 
+Morning 
+Days 1–12 
+Afternoon 
+Days 1–12 
+Evening 
+Closeout 
+Consent X      
+State/context 
+survey 
+ X X X X  
+Speech 
+prompt 
+ X X X X  
+TMB tasks  X X  X  X   
+AE/usability 
+check 
+  X X X  
+Debrief/comp      X 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
+ 
+  
+  
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 19   | 
+40  
+
+--- PAGE 20 ---
+ 
+ 
+Appendix A: QA/narrative prompts 
+A. Subjective Cognitive Functioning / Mental Clarity 
+1. Describe situations in your everyday life when your thinking tends to feel especially clear or sharp. What 
+are you usually doing, and what do you think helps? 
+2. Describe some situations in your daily life when your thinking tends to feel slower or less clear. What 
+kinds of activities are you usually doing, and how do you usually respond? 
+3. Tell us about the kinds of things that usually make it harder for you to concentrate, and how you typically 
+handle that. 
+4. Think of a type of task that you generally find mentally demanding. Walk us through what it usually 
+involves and how it typically feels for you. 
+ 
+B. Fatigue, Effort, and Performance 
+1. Describe what it is generally like for you when you feel mentally tired but continue with your activities. 
+What kinds of things do you usually do in those situations? 
+2. In a typical day, when do you tend to feel most alert and when do you tend to feel more tired? What are 
+you usually doing at those times? 
+3. Tell us about types of tasks that usually require more mental effort for you than you expect. What tends 
+to make them feel harder, and how do you typically adapt? 
+ 
+C. Attention, Interruptions, and Environment 
+1. Describe a place where you often spend time (for example at home, at work, or somewhere else). How 
+does that kind of environment usually affect your ability to focus, if at all? 
+2. Describe the kinds of interruptions that commonly happen when you are trying to focus on something, 
+and what usually happens afterwards. 
+3. Describe situations in your daily life when you need to switch quickly from one task to another. What 
+kinds of tasks are involved, and how does that switch usually feel for you? 
+4. Describe a place where you often do things that require concentration (for example, where you usually 
+study, work, or focus on tasks). What, if anything, makes it easier or harder to concentrate there? 
+ 
+D. Everyday Memory and Planning 
+1. Describe some strategies you use to remember important things you need to do, and how well they 
+usually work for you. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 20   | 
+40  
+
+--- PAGE 21 ---
+ 
+2. Tell us about how you usually plan your day or week. What kinds of steps do you take, and how do you 
+keep track of them? 
+3. Think about the kinds of strategies you typically use to remember things (such as notes, alarms, or 
+repeating things to yourself). Describe how you use them and how well they tend to work. 
+4. Describe situations in your life where you often have to keep track of several things at once. How do you 
+usually manage this, and how does it typically go? 
+ 
+E. Mood, Stress, and Cognition 
+1. Think about situations in your life that usually require you to stay mentally organised or focused. 
+Describe what tends to happen and how this usually affects your ability to think clearly. 
+2. Describe types of moments in your day that you usually find positive or enjoyable. What tends to happen, 
+how do you usually feel, and what do you notice about your focus or energy at those times? 
+3. In general, what kinds of things tend to change your mood during the day, and does that usually affect 
+what you are doing? 
+ 
+F. Social Interactions and Communication 
+1. Describe the kinds of conversations or interactions with other people that often stand out to you in a 
+typical day. What are these situations usually like, and how do the conversations tend to go? 
+2. Tell us about situations in general where it can be harder for you to get your point across or to understand 
+someone else. What tends to make communication more difficult in those cases? 
+3. Describe what a clear and effective conversation usually looks like for you. What kinds of things help 
+you communicate especially clearly? 
+ 
+G. Global Day Review / Audio Diary Style 
+1. Describe a typical sequence of events in a usual day for you, from when you wake up until later in the 
+day. Include a few things that usually feel easy and a few that usually require more effort. 
+2. Thinking about an ordinary day, what are one or two activities you generally feel satisfied with, and 
+why? 
+3. Thinking about your usual days, describe how your energy and focus tend to change from morning to 
+evening. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 21   | 
+40  
+
+--- PAGE 22 ---
+ 
+Appendix B: Picture-description stimuli and Questionnaires
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 22   | 
+40  
+
+
+--- PAGE 23 ---
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 23   | 
+40  
+
+
+--- PAGE 24 ---
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 24   | 
+40  
+
+
+--- PAGE 25 ---
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 25   | 
+40  
+
+
+--- PAGE 26 ---
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 26   | 
+40  
+
+
+--- PAGE 27 ---
+ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 27   | 
+40  
+
+
+--- PAGE 28 ---
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 28   | 
+40  
+
+
+--- PAGE 29 ---
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 29   | 
+40  
+
+
+--- PAGE 30 ---
+ 
+ 
+ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 30   | 
+40  
+
+
+--- PAGE 31 ---
+ 
+Appendix C: Informed Consent Form 
+1. Title of the Study 
+M-CAMPUS: A within-subject mobile study testing whether speech and 
+smartphone-captured context predict momentary cognitive performance, using 
+cognitive tasks in naturalistic environments. 
+ 
+2. Summary of the Study (Goals, Procedures, Duration) 
+You are invited to take part in a research study about how thinking and attention vary in 
+daily life, and whether short speech samples and information about your surroundings can 
+help predict these fluctuations. 
+Participation takes place entirely on your smartphone and involves: 
+● One baseline session (~25–30 minutes) 
+● 12 days of brief daily sessions: three per day (morning, afternoon, evening), each 
+lasting ~5–7 minutes 
+Each daily session includes: 
+1. A short survey about your current state and environment 
+2. A 60–90 second spoken response to a prompt 
+3. Short cognitive tasks 
+4. A brief question about interruptions 
+You may complete sessions anywhere that is safe and comfortable for you. 
+ 
+3. Institutional Framework and Responsible Researchers 
+This study is conducted by the KrauthammerLab, Department of Quantitative Biomedicine, 
+University of Zurich, in collaboration with researchers aﬀiliated with UZH/ETH Zürich. 
+ 
+4. Possible Advantages and Value of the Study 
+There is no direct personal benefit for participating. However: 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 31   | 
+40  
+
+--- PAGE 32 ---
+ 
+● You contribute to research on how cognitive performance changes in everyday life. 
+● The findings may support the development of future digital tools for assessing 
+attention and cognition. 
+This study is not a diagnostic or clinical assessment. 
+ 
+5. Possible Inconveniences or Risks 
+Participation involves minimal risk. Possible inconveniences include: 
+● Mild fatigue or reduced concentration from repeated short tasks 
+● Minor frustration if tasks feel challenging 
+● Privacy considerations due to short voice recordings (voice is potentially 
+re-identifiable biometric data) 
+● Context information may reflect aspects of your environment (e.g., noise level, 
+interruptions) 
+Risk mitigation measures 
+● All data are pseudonymised (no names or direct identifiers are collected). 
+● Voice recordings and all study data are transferred via encrypted connections. 
+● Data are stored securely on ETH Zürichʼs Leonhard Med research infrastructure. 
+● You may stop participation at any time. 
+● Participants may request deletion of their data up to 30 days after completing 
+their final study session. After this cutoﬀ, datasets are locked for final quality 
+checks and analysis, and deletion is no longer technically feasible. 
+There are no physical risks and no sensitive personal questions (no trauma, illegal 
+behaviour, sexual behaviour, political views, or clinical diagnosis items). 
+ 
+6. Voluntary Participation and Right to Withdraw 
+Your participation is entirely voluntary. 
+You may: 
+● stop participating at any time, 
+● withdraw without giving a reason, and 
+● request deletion of your data (up to the cutoﬀ date described in the information 
+sheet), 
+without any negative consequences. 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 32   | 
+40  
+
+--- PAGE 33 ---
+ 
+ 
+7. Data Protection: Storage, Processing, Confidentiality, and 
+Sharing 
+Data collected 
+● Speech recordings and derived speech features 
+● Cognitive task performance (accuracy, reaction time) 
+● Short self-reports (mood, stress, context, alertness, attention) 
+● Device-level contextual information (noise proxy, app interruptions, device type/OS, 
+network stability) 
+● Demographics (age, gender, education, language background) 
+How your data are handled 
+● Data are stored using a random pseudonymous participant ID. 
+● No names, email addresses, phone numbers, or other direct identifiers are stored 
+with your research data. 
+● Speech recordings remain potentially re-identifiable; therefore full anonymity 
+cannot be guaranteed. 
+● Gorilla.sc (UK) temporarily stores encrypted data for task delivery. 
+● After each session, data are transferred to Leonhard Med (ETH Zürich), where they 
+are stored securely. 
+● Only authorized study personnel have access to the data. 
+Data sharing 
+● No study data will be shared outside the research team. 
+● This includes both raw audio recordings and all other research data (derived 
+features, cognitive performance data, survey data, and context measures). 
+ 
+Your data will never be used for commercial profiling, automated decision-making, or 
+diagnostic evaluation. 
+ 
+8. Contact Information 
+For questions about the study 
+Prof. Michael Krauthammer 
+KrauthammerLab, Department of Quantitative Biomedicine 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 33   | 
+40  
+
+--- PAGE 34 ---
+ 
+University of Zurich 
+Email: michael.krauthammer@uzh.ch 
+For questions about ethical aspects 
+Ethics Committee, Faculty of Arts and Social Sciences 
+Email: chair.ethics.committee@phil.uzh.ch 
+Chair: Prof. Dr. Christopher Hopwood 
+ 
+9. Statement of Consent (Participant Declaration) 
+By signing (or electronically confirming) below, I declare that: 
+● I have read and understood the information in this consent form. 
+● I have had the opportunity to ask questions, and they were answered satisfactorily. 
+● I understand that participation is voluntary and can be withdrawn at any time 
+without consequences. 
+● I consent to the collection, use, and storage of my data as described above. 
+● I voluntarily agree to participate in this study. 
+ 
+10. Copy of the Consent Form 
+You will receive a downloadable copy of this consent form. 
+ 
+11. Signatures 
+Participant 
+Name: ___________________________ 
+Signature: ________________________ 
+Date: ____________________________ 
+Researcher 
+Name: ___________________________ 
+Signature: ________________________ 
+Date: ____________________________ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 34   | 
+40  
+
+--- PAGE 35 ---
+ 
+12. Contact Information for the Ethics Committee 
+Faculty of Arts and Social Sciences Ethics Committee 
+Chair: Prof. Dr. Christopher Hopwood 
+University of Zurich 
+Institute of Psychology 
+Binzmühlestrasse 14, CH-8050 Zürich 
+Email: chair.ethics.committee@phil.uzh.ch 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 35   | 
+40  
+
+--- PAGE 36 ---
+ 
+Appendix D: Formular Datenschutz-Folgenabschätzung (DSFA)  
+Formular Datenschutz-Folgenabschätzung (DSFA) 
+Dieses Formular unterstützt die öffentlichen Organe im Kanton Zürich bei der Erstellung einer 
+Datenschutz-Folgenabschätzung (DSFA). Eine DSFA ist zu erstellen, wenn eine neue Bearbeitung von Personendaten 
+beabsichtigt wird. 
+ 
+Das Merkblatt Datenschutz-Folgenabschätzung beantwortet die häufigsten Fragen zur DSFA. 
+1 Angaben zum verantwortlichen öﬀentlichen Organ 
+Verantwortliches Organ KrauthammerLab, Department of Quantitative Biomedicine, University of Zurich 
+Kontaktperson Morteza Rohanian 
+Telefonnummer +41 44 635 66 31 
+E-Mail-Adresse morteza.rohanian@uzh.ch 
+ 
+2 Beschreibung der beabsichtigten Bearbeitung von Personendaten 
+Welche (besonderen) Personendaten sollen bearbeitet werden (Datenkategorien)? 
+Audioaufnahmen der Stimme (Sprechaufforderungen, 60–90 Sekunden/Sitzung). → Sprachdaten gelten als potenziell 
+re-identifizierbare biometrische Daten, auch wenn sie nicht zur Identifikation verwendet werden. Abgeleitete 
+Sprachmerkmale (z. B. Sprechgeschwindigkeit, Pausen, Versprecher, Prosodie, lexikalische Diversität, semantische 
+Kohärenz).→ Werden aus den Rohdaten verarbeitet; dienen der Prädiktionsanalyse.  Kognitive Leistungsdaten (Genauigkeit, 
+Reaktionszeit, Leistungsmaße aus TestMyBrain-Aufgaben). Smartphone-/Kontextsignale (Umgebungsgeräusch-Proxy, 
+Unterbrechungen, Gerätetyp, Kopfhörernutzung, Netzwerkqualität). Selbstauskünfte (Stress, Müdigkeit, Stimmung, 
+Koffeinkonsum, Ortstyp, wahrgenommener Lärm/Unterbrechungen). Demographische Angaben: Alter, Sprachflüssigkeit in der 
+Studiensprache (bei Einschluss erhoben). 
+Wie sollen Personendaten bearbeitet werden (Bearbeitungsvorgänge einschliesslich Datenbekanntgaben und Empfangende)? 
+Erhebung: 1- Teilnehmende absolvieren Aufgaben und Fragebögen über die Online-Plattform Gorilla (Rekrutierung, 
+Einwilligung, Aufgabenbereitstellung). 2- Sprachaufnahmen und Kontextdaten werden über die individuelle Studien-Web-App 
+auf den Smartphones der Teilnehmenden erhoben. Verarbeitung: 1-  Gorilla-Server speichern Aufgaben- und Befragungsdaten 
+vorübergehend bis zur sicheren Übertragung. 2- Sprachaufnahmen und Kontextdaten werden über die Studien-Web-App 
+erfasst und zunächst verschlüsselt an Gorilla übermittelt und dort vorübergehend gespeichert, bevor sie sicher auf die Server 
+von Leonhard Med (ETH Zürich) übertragen werden. 3- Abgeleitete Sprachmerkmale (z. B. Prosodie, Pausen) werden auf den 
+sicheren Servern berechnet; Roh-Audiodaten werden nur für Analysen innerhalb des Projekts aufbewahrt. Speicherung: 1- 
+Endgültige Speicherung und Analysen erfolgen ausschliesslich auf Leonhard Med (ETH Zürich, sichere Infrastruktur). 2- Daten 
+verbleiben auf den Gorilla-Servern nur bis zur bestätigten Übertragung (max. 30 Tage, frühere Löschung gemäss 
+Gorilla-Richtlinie). 3- Daten werden während der Übertragung (TLS) und im Ruhezustand verschlüsselt. 4- Pseudonymisierte IDs 
+werden verwendet. Eine Verknüpfungsdatei mit Namen oder Kontaktdaten wird nicht durch die Forschungsgruppe geführt; 
+diese verbleibt ausschliesslich bei Gorilla für Rekrutierung und Einwilligung. Zugriff auf die Forschungsdaten haben nur 
+autorisierte Projektmitarbeitende.Datenweitergabe / Offenlegung: 1- Keine Weitergabe von Roh- oder pseudonymisierten 
+Daten an Dritte; keine offene/öffentliche Datenfreigabe. 2- Daten bleiben vollständig unter Kontrolle des Forschungsteams. 3- 
+Ergebnisse werden ausschliesslich in aggregierter/anonymisierter Form publiziert.  
+Zu welchem Zweck sollen Personendaten bearbeitet werden? 
+1- Untersuchung, ob Sprachmerkmale und Smartphone-/Kontextsignale die momentane kognitive 
+Leistungsfähigkeit im Alltag vorhersagen. 2- Analyse von intraindividuellen Schwankungen der 
+Kognition und der Effekte randomisierter Ablenkung. 3- Beitrag zur Grundlagenforschung über 
+kognitive Variabilität in natürlichen Umgebungen. 4- Keine Verwendung zu medizinischer 
+Diagnostik, Behandlung oder kommerziellem Profiling. 
+In welchem Umfang sollen Personendaten bearbeitet werden (Anzahl Datensätze, betroffene Personen)? 
+1- Geplante Teilnehmende: ca. 120 gesunde erwachsene Freiwillige (Alter 18–70). 2- Daten pro 
+Person: ca. 36 geplante Sitzungen (3 pro Tag × 12 Tage); erwartet ca. 27 absolvierte Sitzungen. 3- 
+Gesamtumfang: ca. 3.240 Sitzungen über die gesamte Stichprobe. 4- Pro Sitzung erhobene 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 36   | 
+40  
+
+--- PAGE 37 ---
+ 
+Daten: Sprachaufnahme (60–90 s), Ergebnisse kognitiver Aufgaben, kurze Fragebogendaten, 
+Smartphone-/Kontextprotokolle. 
+3 Risikoanalyse 
+Welche Risiken für die Grundrechte (Privatsphäre, informationelle Selbstbestimmung) sind mit der geplanten neuen 
+Bearbeitung von Personendaten verbunden? (Beispiele für Risiken sind in Ziffer 6 des Merkblatts DSFA aufgeführt.) 
+1. Re-Identifikationsrisiko durch Sprachaufnahmen – Auch bei Pseudonymisierung kann Stimme potenziell als biometrisches 
+Merkmal dienen. 
+2. Datenschutzrisiko durch Kontextinformationen – Ortstyp, Lärmpegel und Unterbrechungen können Aspekte des 
+Tagesablaufs oder der Lebensumstände offenbaren. 
+3. Datensicherheitsrisiko während Übertragung/Speicherung – Temporäre Speicherung auf Gorilla-Servern und Übertragung 
+auf UZH-Server schaffen Stellen, an denen Daten exponiert sein könnten, falls Verschlüsselung/Schutz unzureichend wären. 
+4. Risiko unbeabsichtigter Offenlegung durch Ergebnisse – Bei Analysen kleiner Untergruppen besteht ein (geringes) Risiko 
+indirekter Identifikation in Publikationen, wenn keine sorgfältige Anonymisierung erfolgt. 
+5. Langzeitrisiko durch Sprachdaten – Da Sprachaufnahmen biometrisch sind, bleibt auch nach Löschung direkter IDs ein 
+Restrisiko der Re-Identifikation bestehen, falls Audiodaten langfristig gespeichert werden. 
+6. Klicken Sie hier, um Text einzugeben. 
+ 
+Liegen Faktoren vor, durch welche die identifizierten Risiken zu einer hohen Gefährdung von Grundrechten betroffener 
+Personen führen können (besondere Risikofaktoren)? Wenn ja, welche? 
+☐ automatisierte Einzelentscheidungen 
+☐ systematische Überwachung 
+☒ Bearbeitung von besonderen Personendaten 
+☐ Personendaten, die in grossem Umfang bearbeitet werden (Kriterium: Anzahl der Betroffenen, Menge der Daten etc.) 
+☐ Zusammenführen/ Kombinieren von Personendaten, die durch unterschiedliche Prozesse gewonnen wurden 
+☒ Einsatz neuer Technologien oder biometrischer Verfahren 
+☐ Zusammenarbeit von mehr als drei Amtsstellen 
+☐ Scoring/Profiling 
+☐ Online-Zugriffe/Abrufverfahren 
+☐ andere Risikofaktoren, welche zu einer hohen Gefährdung von Grundrechten betroffener Personen führen können: 
+Klicken Sie hier, um Text einzugeben. 
+☐ keine besonderen Risikofaktoren vorhanden 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 37   | 
+40  
+
+--- PAGE 38 ---
+ 
+4 Bewertung von Risiken 
+Wie sind die identifizierten Risiken und die dazugehörenden Risikofaktoren in Bezug auf die Schwere des Eingriffs in die 
+Grundrechte zu bewerten? 
+Risiko Bewertung   
+(übertragen von oben) gering mittel schwer 
+1. Re-Identifikationsrisiko durch Sprachaufnahmen  ☐ ☒ ☐ 
+2. Datenschutzrisiko durch Kontextinformationen  ☒ ☐ ☐ 
+3. Datensicherheitsrisiko während Übertragung/Speicherung ☐ ☒ ☐ 
+4. Risiko unbeabsichtigter Offenlegung in Publikationen ☒ ☐ ☐ 
+5. Langzeitrisiko durch Sprachdaten ☐ ☒ ☐ 
+6. Klicken Sie hier, um Text einzugeben. ☐ ☐ ☐ 
+ 
+Wie sind die identifizierten Risiken und dazugehörenden Risikofaktoren in Bezug auf die Wahrscheinlichkeit ihres 
+Eintretens zu bewerten? 
+Risiko Bewertung   
+(übertragen von oben) gering mittel schwer 
+1. Re-Identifikationsrisiko durch Sprachaufnahmen  ☒ ☐ ☐ 
+2. Datenschutzrisiko durch Kontextinformationen ☐ ☒ ☐ 
+3. Datensicherheitsrisiko während Übertragung/Speicherung  ☒ ☐ ☐ 
+4. Risiko unbeabsichtigter Offenlegung in Publikationen ☐ ☒ ☐ 
+5. Langzeitrisiko durch Sprachdaten ☒ ☐ ☐ 
+6. Klicken Sie hier, um Text einzugeben. ☐ ☐ ☐ 
+ 
+5 Massnahmen zur Reduktion der Risiken 
+Welche Massnahmen zur Reduktion der identifizierten Risiken wurden bereits getroffen? 
+Pseudonymisierung: Alle Daten nur über Studien-IDs verknüpft; keine direkten 
+Identifikatoren gespeichert 
+☐ Dokumentation vorhanden 
+Sichere Server: Endgültige Speicherung auf Leonhard Med-Servern mit Verschlüsselung im 
+Ruhezustand und bei Übertragung. 
+☐ Dokumentation vorhanden 
+Zugangskontrolle: Rollenbasierter Zugriff, Audit-Logs, separate Verknüpfungsdatei. ☐ Dokumentation vorhanden 
+Verschlüsselung: TLS für alle Übertragungen; Verschlüsselung im Ruhezustand. ☐ Dokumentation vorhanden 
+Einwilligung & Transparenz: Remote-Einwilligung, klare Information der Teilnehmenden 
+über Sprachdaten und Re-Identifikationsrisiko. Datenaufbewahrungsfristen: Gorilla max. 30 
+Tage; finale Speicherung Leonhard Med für die Dauer der Studie gemäss ETH/UZH 
+Richtlinien. 
+☐ Dokumentation vorhanden 
+ 
+ 
+ 
+Welche Massnahmen zur Reduktion der identifizierten Risiken sind geplant? 
+Massnahme geplant per: 
+Regelmässige Sicherheitsprüfungen und Backups der Leonardmed-Server vor 
+Studienbeginn 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 38   | 
+40  
+
+--- PAGE 39 ---
+ 
+Massnahme geplant per: 
+Löschkonzept für Roh-Audiodaten nach Abschluss der Hauptanalysen (nur abgeleitete Merkmale bleiben) nach 
+Studienabschlu
+ss 
+Interne Review-Prozesse für Publikationen, um indirekte Re-Identifikation in kleinen Subgruppen zu 
+verhindern 
+vor Publikation 
+Schulung des Projektpersonals in sicherem Umgang mit personenbezogenen Daten vor Einschluss 
+der ersten 
+Teilnehmenden 
+Dokumentation der Datenflüsse und jährliche Überprüfung der Löschfristen (Gorilla und Leonhard Med).  
+ 
+6 Notwendigkeit Vorabkontrolle 
+Sind besondere Risikofaktoren (Ziffer 3) identifiziert worden, ist die beabsichtigte Datenbearbeitung der 
+Datenschutzbeauftragten (DSB) zur Vorabkontrolle einzureichen. 
+ 
+Erläuterungen können dem Merkblatt Vorabkontrolle entnommen werden. 
+ 
+Vorabkontrollgesuche und Fragen können per E-Mail an datenschutz@dsb.zh.ch oder über das verschlüsselte 
+Kontaktformular übermittelt werden. 
+ 
+ 
+7 Weiteres Vorgehen 
+ 
+☐ Projekt wird der DSB zur  
+Vorabkontrolle eingereicht 
+☒ Vorabkontrolle nicht erforderlich 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 39   | 
+40  
+
+--- PAGE 40 ---
+ 
+Appendix E: Data Protection Officer Consultation 
+ 
+Dear Mrs Rohanian 
+  
+Thank you very much for your message. I have studied your documents. In 
+the DSFA form (which is more detailed than DESAT in this regard), you 
+have identified and assessed the potential risks well. As the risk 
+assessment has only revealed a low or medium probability and the 
+participation of the test subjects is voluntary, I would assess the situation as 
+such that a prior check by the data protection supervisory authority is not 
+absolutely necessary. 
+In any case, you must inform the participants in detail about what will 
+happen to their data, how long you will store it, when you will delete it, etc. 
+You must also inform them about their rights (right to information, deletion, 
+etc., as well as the right to withdraw from the study). 
+  
+I recommend that you submit your research project to the faculty ethics 
+committee for review. 
+  
+Kind regards 
+M. Golder 
+  
+_______________________________________ 
+Markus Golder, lic. iur. HSG, Rechtsanwalt 
+Bereichsleiter Datenschutz 
+ 
+Universität Zürich | Recht und Datenschutz 
+Hirschengraben 60 | CH-8001 Zürich  
++41 44 634 01 78 | markus.golder@uzh.ch 
+www.rud.uzh.ch 
+ 
+ 
+ 
+Universität Zürich   |   Faculty of Arts and Social Sciences Ethics Committee 40   | 
+40  
