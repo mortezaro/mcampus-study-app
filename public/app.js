@@ -537,7 +537,14 @@ function deviceCheck() {
     language: navigator.language,
     userAgent: navigator.userAgent,
     viewport: `${window.innerWidth}x${window.innerHeight}`,
+    screen: `${window.screen?.width || ""}x${window.screen?.height || ""}`,
+    colorDepth: window.screen?.colorDepth || null,
     pixelRatio: window.devicePixelRatio,
+    hardwareConcurrency: navigator.hardwareConcurrency || null,
+    deviceMemoryGb: navigator.deviceMemory || null,
+    maxTouchPoints: navigator.maxTouchPoints || 0,
+    pointerCoarse: window.matchMedia?.("(pointer: coarse)")?.matches || false,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null,
     connection: navigator.connection ? {
       effectiveType: navigator.connection.effectiveType,
       downlink: navigator.connection.downlink,
@@ -597,16 +604,16 @@ function assignPrompts() {
   saveLocal();
 }
 
-function recorderMarkup(task, session, seconds = 60) {
+function recorderMarkup(task, session, maxSeconds = 90, minSeconds = 60) {
   return `
-    <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-target="${seconds}">
+    <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-min="${minSeconds}" data-target="${maxSeconds}">
       <div class="meter"><span></span></div>
       <div class="status">Ready to record</div>
       <button class="button" data-action="start">Start recording</button>
       <button class="button danger" data-action="stop" disabled>Stop and upload</button>
       ${DEMO_MODE ? `<button class="button secondary" data-action="demo">Demo: mark uploaded</button>` : ""}
       <audio controls hidden></audio>
-      <div class="small">Production quality rule: aim for at least 30 seconds of speech; target is ${seconds} seconds.</div>
+      <div class="small">Production quality rule: record at least ${minSeconds} seconds. You may stop after ${minSeconds} seconds; recording auto-stops at ${maxSeconds} seconds.</div>
     </div>
   `;
 }
@@ -620,10 +627,16 @@ function attachRecorder(task, session, done) {
   const demoButton = root.querySelector("[data-action='demo']");
   const audio = root.querySelector("audio");
   const target = Number(root.dataset.target || 60);
+  const minSeconds = Number(root.dataset.min || 60);
   let mediaRecorder;
   let chunks = [];
   let startedAt = 0;
   let timer;
+
+  const stopRecording = () => {
+    stopButton.disabled = true;
+    if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
+  };
 
   startButton.onclick = async () => {
     try {
@@ -647,21 +660,25 @@ function attachRecorder(task, session, done) {
           headers: { "content-type": blob.type },
           body: blob
         });
-        status.textContent = seconds < 30 ? "Recording uploaded, but it is shorter than the production minimum" : "Recording uploaded";
-        status.className = seconds < 30 ? "status warn" : "status ok";
+        status.textContent = seconds < minSeconds ? "Recording uploaded, but it is shorter than the production minimum" : "Recording uploaded";
+        status.className = seconds < minSeconds ? "status warn" : "status ok";
         stream.getTracks().forEach(track => track.stop());
-        await logEvent("recording_complete", { task, session, seconds });
+        await logEvent("recording_complete", { task, session, seconds, minSeconds, maxSeconds: target, tooShort: seconds < minSeconds });
         done();
       };
       startedAt = Date.now();
       mediaRecorder.start();
       startButton.disabled = true;
-      stopButton.disabled = false;
+      stopButton.disabled = true;
       status.textContent = "Recording...";
       timer = setInterval(() => {
         const elapsed = (Date.now() - startedAt) / 1000;
         meter.style.width = `${Math.min(100, (elapsed / target) * 100)}%`;
-        status.textContent = `Recording... ${Math.floor(elapsed)}s`;
+        if (elapsed >= minSeconds) stopButton.disabled = false;
+        status.textContent = elapsed < minSeconds
+          ? `Recording... ${Math.floor(elapsed)}s (stop available at ${minSeconds}s)`
+          : `Recording... ${Math.floor(elapsed)}s (you may stop now)`;
+        if (elapsed >= target) stopRecording();
       }, 300);
     } catch {
       status.textContent = "Microphone permission was not granted.";
@@ -669,17 +686,14 @@ function attachRecorder(task, session, done) {
     }
   };
 
-  stopButton.onclick = () => {
-    stopButton.disabled = true;
-    if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
-  };
+  stopButton.onclick = stopRecording;
 
   if (demoButton) {
     demoButton.onclick = async () => {
       meter.style.width = "100%";
       status.textContent = "Demo recording marked complete";
       status.className = "status ok";
-      await logEvent("recording_demo_complete", { task, session });
+      await logEvent("recording_demo_complete", { task, session, minSeconds, maxSeconds: target });
       done();
     };
   }
@@ -791,6 +805,16 @@ function startCognitiveBattery(phase, returnStep) {
   state.cognitiveReturn = returnStep;
   state.cognitiveOrder = buildCognitiveOrder();
   saveLocal();
+  logEvent("cognitive_battery_start", {
+    phase,
+    returnStep,
+    cognitiveOrder: state.cognitiveOrder,
+    emaSession: state.emaDraft?.key || null,
+    emaDay: state.emaDraft?.day || null,
+    emaSessionIndex: state.emaDraft ? state.emaDraft.index + 1 : null,
+    emaSlot: state.emaDraft?.slot || null,
+    emaSlotLabel: state.emaDraft?.label || null
+  });
   go(COGNITIVE_STEP_BY_TASK[state.cognitiveOrder[0]] || "choiceRt");
 }
 
@@ -801,6 +825,22 @@ function nextCognitiveStep(taskKey) {
   return nextTask ? COGNITIVE_STEP_BY_TASK[nextTask] : state.cognitiveReturn || "finalSurvey";
 }
 
+function cognitiveTaskMeta(taskKey) {
+  const order = Array.isArray(state.cognitiveOrder) && state.cognitiveOrder.length ? state.cognitiveOrder : COGNITIVE_TASK_KEYS;
+  const index = order.indexOf(taskKey);
+  const draft = state.emaDraft;
+  return {
+    cognitiveOrder: order,
+    taskPosition: index >= 0 ? index + 1 : null,
+    taskCount: order.length,
+    emaSession: draft?.key || null,
+    emaDay: draft?.day || null,
+    emaSessionIndex: draft ? draft.index + 1 : null,
+    emaSlot: draft?.slot || null,
+    emaSlotLabel: draft?.label || null
+  };
+}
+
 function lastCognitiveStep() {
   const order = Array.isArray(state.cognitiveOrder) && state.cognitiveOrder.length ? state.cognitiveOrder : COGNITIVE_TASK_KEYS;
   const lastTask = order[order.length - 1];
@@ -809,7 +849,7 @@ function lastCognitiveStep() {
 
 function finishTask(task, trials, next) {
   const correct = trials.filter(t => t.correct).length;
-  const summary = { completedAt: new Date().toISOString(), trials, correct, total: trials.length };
+  const summary = { completedAt: new Date().toISOString(), ...cognitiveTaskMeta(task), trials, correct, total: trials.length };
   if (state.cognitivePhase === "ema" && state.emaDraft) {
     state.emaDraft.tmb = state.emaDraft.tmb || {};
     state.emaDraft.tmb[task] = summary;
@@ -817,7 +857,7 @@ function finishTask(task, trials, next) {
     state.tmb[task] = summary;
   }
   saveLocal();
-  logEvent("tmb_task_complete", { phase: state.cognitivePhase, emaSession: state.emaDraft?.key || null, task, correct, total: trials.length, trials });
+  logEvent("tmb_task_complete", { phase: state.cognitivePhase, task, correct, total: trials.length, ...cognitiveTaskMeta(task), trials });
   page(`
     <h1>Task complete</h1>
     <p class="lead">${correct} of ${trials.length} trials correct.</p>
@@ -895,6 +935,7 @@ async function markOfficialTmbComplete(taskKey) {
     sourceFolder: task.sourceFolder,
     sourceFile: task.sourceFile,
     url: tmbUrl(taskKey),
+    ...cognitiveTaskMeta(taskKey),
     collectionNote: "Manual wrapper completion without captured TMB results."
   };
   if (state.cognitivePhase === "ema" && state.emaDraft) {
@@ -906,8 +947,8 @@ async function markOfficialTmbComplete(taskKey) {
   saveLocal();
   await logEvent("tmb_official_task_complete", {
     phase: state.cognitivePhase,
-    emaSession: state.emaDraft?.key || null,
     task: taskKey,
+    ...cognitiveTaskMeta(taskKey),
     ...summary
   });
 }
@@ -939,9 +980,8 @@ function officialTmbTask(taskKey) {
   `);
   logEvent("tmb_official_task_launch", {
     phase: state.cognitivePhase,
-    emaSession: state.emaDraft?.key || null,
     task: taskKey,
-    cognitiveOrder: state.cognitiveOrder,
+    ...cognitiveTaskMeta(taskKey),
     sourceFolder: task.sourceFolder,
     sourceFile: task.sourceFile,
     url
@@ -954,6 +994,7 @@ function officialTmbTask(taskKey) {
       sourceFolder: taskMeta.sourceFolder,
       sourceFile: taskMeta.sourceFile,
       url: tmbUrl(taskKey),
+      ...cognitiveTaskMeta(taskKey),
       score: data.score ?? null,
       outcomes: data.outcomes || {},
       results: Array.isArray(data.results) ? data.results : [],
@@ -969,9 +1010,8 @@ function officialTmbTask(taskKey) {
     saveLocal();
     await logEvent("tmb_official_task_result", {
       phase: state.cognitivePhase,
-      emaSession: state.emaDraft?.key || null,
       task: taskKey,
-      cognitiveOrder: state.cognitiveOrder,
+      ...cognitiveTaskMeta(taskKey),
       ...summary
     });
     const status = document.querySelector("#tmbStatus");
@@ -1218,17 +1258,32 @@ function finalSurvey() {
 
 function buildPictureSchedule() {
   const pics = pictureBank();
-  const pool = [];
-  for (let repeat = 0; repeat < 3; repeat += 1) {
-    pics.forEach((pic, index) => pool.push({ id: pic.id, key: `${repeat}-${index}` }));
+  const sessionsPerDay = state.config.ema.sessionsPerDay;
+  const days = state.config.ema.days;
+  const schedule = Array.from({ length: days * sessionsPerDay });
+
+  for (let slot = 0; slot < sessionsPerDay; slot += 1) {
+    const slotOrder = pics
+      .map((pic, index) => ({ id: pic.id, rank: uidHash(`${state.participantId}:pic-slot:${slot}:${index}:${pic.id}`, 100000) }))
+      .sort((a, b) => a.rank - b.rank)
+      .map(item => item.id);
+    for (let day = 0; day < days; day += 1) {
+      schedule[day * sessionsPerDay + slot] = slotOrder[day % slotOrder.length];
+    }
   }
-  const schedule = pool
-    .sort((a, b) => uidHash(`${state.participantId}:pic:${a.key}:${a.id}`, 100000) - uidHash(`${state.participantId}:pic:${b.key}:${b.id}`, 100000))
-    .map(item => item.id);
 
   for (let i = 1; i < schedule.length; i += 1) {
     if (schedule[i] !== schedule[i - 1]) continue;
-    const swap = schedule.findIndex((id, j) => j > i && id !== schedule[i - 1] && (j + 1 >= schedule.length || schedule[i] !== schedule[j + 1]));
+    const slot = i % sessionsPerDay;
+    const swap = schedule.findIndex((id, j) => {
+      if (j <= i || j % sessionsPerDay !== slot) return false;
+      const current = schedule[i];
+      const leftOk = id !== schedule[i - 1];
+      const rightOk = i + 1 >= schedule.length || id !== schedule[i + 1];
+      const swapLeftOk = j === 0 || current !== schedule[j - 1];
+      const swapRightOk = j + 1 >= schedule.length || current !== schedule[j + 1];
+      return leftOk && rightOk && swapLeftOk && swapRightOk;
+    });
     if (swap > i) {
       const tmp = schedule[i];
       schedule[i] = schedule[swap];
@@ -1244,7 +1299,7 @@ function emaHome() {
   for (let day = 1; day <= state.config.ema.days; day += 1) {
     for (let slot = 0; slot < state.config.ema.sessionsPerDay; slot += 1) {
       const key = `d${day}s${slot + 1}`;
-      rows.push({ key, day, label: state.config.ema.windows[slot], done: state.ema[key]?.done });
+      rows.push({ key, day, slot: slot + 1, label: state.config.ema.windows[slot], done: state.ema[key]?.done });
     }
   }
   page(`
@@ -1265,6 +1320,17 @@ function emaHome() {
     const next = rows.find(row => !row.done) || rows[0];
     startEmaDraft(next, rows.findIndex(r => r.key === next.key));
     saveLocal();
+    logEvent("ema_session_start", {
+      session: state.emaDraft.key,
+      day: state.emaDraft.day,
+      slot: state.emaDraft.slot,
+      slotLabel: state.emaDraft.label,
+      sessionIndex: state.emaDraft.index + 1,
+      spontaneousPrompt: state.emaDraft.spontaneousPrompt,
+      picture: state.emaDraft.picture,
+      pictureScheduleVersion: state.emaDraft.pictureScheduleVersion,
+      pictureSchedulePosition: state.emaDraft.pictureSchedulePosition
+    });
     go("emaSurvey");
   };
   document.querySelector("#admin").onclick = () => go("admin");
@@ -1279,11 +1345,14 @@ function startEmaDraft(row, index = 0) {
   state.emaDraft = {
     key: row.key,
     day: row.day,
+    slot: row.slot,
     label: row.label,
     index,
     startedAt: new Date().toISOString(),
     spontaneousPrompt: speech,
     picture: pic,
+    pictureScheduleVersion: "balanced-slot-v1",
+    pictureSchedulePosition: index + 1,
     survey: {},
     final: {},
     recordings: {},
@@ -1297,6 +1366,7 @@ function ensureEmaDraft() {
   const row = {
     key: state.currentEma || "d1s1",
     day: Number(dayPart || 1),
+    slot: Number(sessionPart || 1),
     label: state.config.ema.windows[Number(sessionPart || 1) - 1] || "Morning"
   };
   startEmaDraft(row, 0);
@@ -1326,7 +1396,7 @@ function emaSurvey() {
       context: document.querySelector("#emaContext").value
     };
     saveLocal();
-    await logEvent("ema_survey_complete", { session: draft.key, survey: draft.survey });
+    await logEvent("ema_survey_complete", { session: draft.key, day: draft.day, slot: draft.slot, sessionIndex: draft.index + 1, survey: draft.survey });
     go("emaSpeech");
   };
 }

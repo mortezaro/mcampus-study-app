@@ -119,6 +119,23 @@ function safeName(value) {
   return String(value || "unknown").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
 }
 
+function safeUploadFilename(value) {
+  const filename = path.basename(String(value || ""));
+  return /^[a-zA-Z0-9._-]+$/.test(filename) ? filename : "";
+}
+
+function requireAdmin(req, res, url) {
+  if (!ADMIN_TOKEN && NODE_ENV === "production") {
+    sendJson(res, 503, { error: "Admin export disabled until ADMIN_TOKEN is configured." });
+    return false;
+  }
+  if (ADMIN_TOKEN && url.searchParams.get("token") !== ADMIN_TOKEN) {
+    sendJson(res, 401, { error: "Unauthorized" });
+    return false;
+  }
+  return true;
+}
+
 function serveStatic(req, res) {
   const url = new URL(req.url, "http://localhost");
   const pathname = url.pathname === "/" ? "/index.html" : url.pathname;
@@ -220,18 +237,44 @@ async function handleApi(req, res) {
   }
 
   if (req.method === "GET" && url.pathname === "/api/admin/events") {
-    if (!ADMIN_TOKEN && NODE_ENV === "production") {
-      sendJson(res, 503, { error: "Admin export disabled until ADMIN_TOKEN is configured." });
-      return;
-    }
-    if (ADMIN_TOKEN && url.searchParams.get("token") !== ADMIN_TOKEN) {
-      sendJson(res, 401, { error: "Unauthorized" });
-      return;
-    }
+    if (!requireAdmin(req, res, url)) return;
     const rows = fs.existsSync(EVENTS_FILE)
       ? fs.readFileSync(EVENTS_FILE, "utf8").trim().split("\n").filter(Boolean).map(line => JSON.parse(line))
       : [];
     sendJson(res, 200, { rows });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/admin/uploads") {
+    if (!requireAdmin(req, res, url)) return;
+    const files = fs.existsSync(UPLOAD_DIR)
+      ? fs.readdirSync(UPLOAD_DIR).filter(Boolean).sort().map(filename => {
+        const stat = fs.statSync(path.join(UPLOAD_DIR, filename));
+        return {
+          filename,
+          bytes: stat.size,
+          modifiedAt: stat.mtime.toISOString(),
+          downloadPath: `/api/admin/uploads/${encodeURIComponent(filename)}`
+        };
+      })
+      : [];
+    sendJson(res, 200, { uploadDir: UPLOAD_DIR, files });
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname.startsWith("/api/admin/uploads/")) {
+    if (!requireAdmin(req, res, url)) return;
+    const filename = safeUploadFilename(decodeURIComponent(url.pathname.replace(/^\/api\/admin\/uploads\//, "")));
+    const filePath = path.join(UPLOAD_DIR, filename);
+    if (!filename || !filePath.startsWith(UPLOAD_DIR) || !fs.existsSync(filePath)) {
+      sendJson(res, 404, { error: "Upload not found" });
+      return;
+    }
+    res.writeHead(200, {
+      "content-type": MIME[path.extname(filePath)] || "application/octet-stream",
+      "content-disposition": `attachment; filename="${filename}"`
+    });
+    fs.createReadStream(filePath).pipe(res);
     return;
   }
 

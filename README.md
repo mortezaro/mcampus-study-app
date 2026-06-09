@@ -57,6 +57,16 @@ Set these environment variables on the hosting service:
 
 In production, `/api/admin/events` is disabled unless `ADMIN_TOKEN` is set.
 
+## Data Access
+
+Structured event data are stored as JSON lines in `DATA_DIR/events.jsonl`. Audio files are stored in `DATA_DIR/uploads`.
+
+With `ADMIN_TOKEN` set, use these protected endpoints:
+
+- `/api/admin/events?token=ADMIN_TOKEN` exports all logged study events, including questionnaires, cognitive task order/position, TMB outcomes/trial rows, recording metadata, and upload events.
+- `/api/admin/uploads?token=ADMIN_TOKEN` lists uploaded audio files from the persistent disk.
+- `/api/admin/uploads/FILENAME?token=ADMIN_TOKEN` downloads a single uploaded audio file.
+
 ## Deployment Shape
 
 For a real study, deploy this as a HTTPS web app. Mobile participants should use the normal browser on their phone, usually Safari on iPhone/iOS and Chrome on Android. No App Store or Google Play app is needed.
@@ -72,7 +82,7 @@ Microphone recording requires HTTPS in production. Localhost is allowed for test
 
 ## Deploy To Render
 
-This repo includes `render.yaml` for a Render Blueprint. It defines a Node web service in Frankfurt with:
+This repo includes `render.yaml` for a Render Blueprint. It defines a Node web service in Virginia with:
 
 - `npm install` as the build command
 - `npm start` as the start command
