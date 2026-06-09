@@ -41,7 +41,7 @@ const CONFIG = {
   studyName: "M-CAMPUS Mobile Cognition Study",
   studyUrl: APP_BASE_URL,
   maxUploadMb: MAX_UPLOAD_MB,
-  prolificCompletionUrl: process.env.PROLIFIC_COMPLETION_URL || "https://app.prolific.co/submissions/complete?cc=SET_REAL_CODE",
+  prolificCompletionUrl: process.env.PROLIFIC_COMPLETION_URL || "https://app.prolific.com/submissions/complete?cc=CRHUWZ7L",
   baselineSpeechPrompts: [
     "Please describe a recent routine activity from beginning to end. Speak continuously for about 60 to 90 seconds.",
     "Please describe what happened during the morning or afternoon of a recent day. Speak continuously for about 60 to 90 seconds.",
