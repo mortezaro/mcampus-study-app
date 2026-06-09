@@ -2,9 +2,9 @@ services:
   - type: web
     name: mcampus-study-app
     runtime: node
-    region: frankfurt
+    region: virginia
     branch: main
-    plan: starter
+    plan: standard
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /api/health

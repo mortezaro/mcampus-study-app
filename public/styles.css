@@ -119,6 +119,10 @@ p {
   font-weight: 700;
 }
 
+.required {
+  color: var(--accent);
+}
+
 .input,
 textarea,
 select {
@@ -129,6 +133,27 @@ select {
   padding: 10px 12px;
   background: white;
   color: var(--ink);
+}
+
+.field-error {
+  border-color: var(--accent) !important;
+  background: #fff8f8 !important;
+}
+
+.field.field-error {
+  padding: 10px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+}
+
+.form-error {
+  margin: 18px 0;
+  padding: 12px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: #fff2f3;
+  color: #7a1f2b;
+  font-weight: 750;
 }
 
 textarea {

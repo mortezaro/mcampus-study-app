@@ -50,6 +50,37 @@ const PICTURES = [
   svg: id
 }));
 
+const COUNTRY_OPTIONS = [
+  "United States",
+  "Canada",
+  "United Kingdom",
+  "Ireland",
+  "Australia",
+  "New Zealand",
+  "Other English-speaking country",
+  "Other country"
+];
+
+const TIME_ZONE_OPTIONS = [
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "America/Phoenix",
+  "America/Anchorage",
+  "Pacific/Honolulu",
+  "America/Toronto",
+  "America/Vancouver",
+  "Europe/London",
+  "Europe/Dublin",
+  "Australia/Sydney",
+  "Australia/Melbourne",
+  "Australia/Brisbane",
+  "Australia/Perth",
+  "Pacific/Auckland",
+  "Other / not listed"
+];
+
 const state = {
   config: null,
   step: "welcome",
@@ -186,18 +217,77 @@ function bindFields() {
     field.addEventListener("input", event => {
       const target = event.target;
       state.forms[target.dataset.field] = target.type === "checkbox" ? target.checked : target.value;
+      clearFormError();
       saveLocal();
     });
     field.addEventListener("change", event => {
       const target = event.target;
       state.forms[target.dataset.field] = target.type === "checkbox" ? target.checked : target.value;
+      clearFormError();
       saveLocal();
     });
   });
 }
 
 function selectOptions(options, selected = "") {
-  return `<option value="">Choose one</option>${options.map(x => `<option value="${html(x)}" ${selected === x ? "selected" : ""}>${html(x)}</option>`).join("")}`;
+  const extra = selected && !options.includes(selected) ? [selected] : [];
+  return `<option value="">Choose one</option>${extra.concat(options).map(x => `<option value="${html(x)}" ${selected === x ? "selected" : ""}>${html(x)}</option>`).join("")}`;
+}
+
+function clearFormError() {
+  const existing = document.querySelector("#formError");
+  if (existing) existing.remove();
+  document.querySelectorAll(".field-error").forEach(node => node.classList.remove("field-error"));
+}
+
+function showFormError(message, fields = []) {
+  clearFormError();
+  const actions = document.querySelector(".actions");
+  const error = document.createElement("div");
+  error.id = "formError";
+  error.className = "form-error";
+  error.textContent = message;
+  if (actions) actions.before(error);
+  fields.forEach(name => {
+    document.querySelectorAll("[data-field]").forEach(node => {
+      if (node.dataset.field !== name) return;
+      const wrapper = node.closest(".field, .scale-row");
+      if (wrapper) wrapper.classList.add("field-error");
+    });
+  });
+  error.scrollIntoView({ block: "center", behavior: "smooth" });
+}
+
+function formValue(name) {
+  return state.forms[name];
+}
+
+function requireFields(fields) {
+  const missing = fields.filter(field => {
+    const value = formValue(field.name);
+    return value === undefined || value === null || String(value).trim() === "";
+  });
+  if (missing.length) {
+    showFormError(`Please answer all required items before continuing. Missing: ${missing.map(field => field.label).join(", ")}.`, missing.map(field => field.name));
+    return false;
+  }
+  clearFormError();
+  return true;
+}
+
+function requireNumericRange(name, label, min, max) {
+  const raw = String(formValue(name) || "").trim();
+  const value = Number(raw);
+  if (!raw || Number.isNaN(value) || value < min || value > max) {
+    showFormError(`${label} must be a number from ${min} to ${max}.`, [name]);
+    return false;
+  }
+  clearFormError();
+  return true;
+}
+
+function scaleFieldList(items, prefix) {
+  return items.map(([key, label]) => ({ name: `${prefix}_${key}`, label }));
 }
 
 function scaleRows(items, prefix, min = "Low", max = "High") {
@@ -314,38 +404,61 @@ function eligibility() {
 }
 
 function demographics() {
+  if (!state.forms.timezone) {
+    const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    state.forms.timezone = TIME_ZONE_OPTIONS.includes(detectedTimeZone) ? detectedTimeZone : "";
+  }
   page(`
     <h1>Baseline profile</h1>
     <p class="lead">Demographics and language background.</p>
-    <div class="field"><label>Age</label><input class="input" inputmode="numeric" data-field="age" value="${val("age")}"></div>
-    <div class="field"><label>Gender</label><select data-field="gender">${selectOptions(["Woman", "Man", "Non-binary", "Prefer to self-describe", "Prefer not to say"], state.forms.gender)}</select></div>
-    <div class="field"><label>Education</label><select data-field="education">${selectOptions(["Secondary school", "Vocational training", "Some college/university", "Bachelor's degree", "Master's degree", "Doctoral degree", "Other"], state.forms.education)}</select></div>
-    <div class="field"><label>Primary language</label><input class="input" data-field="primary_language" value="${val("primary_language")}"></div>
-    <div class="field"><label>English fluency</label><select data-field="english_fluency">${selectOptions(["Native or near-native", "Fluent", "Comfortable", "Limited"], state.forms.english_fluency)}</select></div>
-    <div class="field"><label>Country/time zone</label><input class="input" data-field="timezone" value="${val("timezone") || Intl.DateTimeFormat().resolvedOptions().timeZone}"></div>
+    <div class="field"><label>Age <span class="required">*</span></label><input class="input" inputmode="numeric" data-field="age" value="${val("age")}" required></div>
+    <div class="field"><label>Gender <span class="required">*</span></label><select data-field="gender" required>${selectOptions(["Woman", "Man", "Non-binary", "Prefer to self-describe", "Prefer not to say"], state.forms.gender)}</select></div>
+    <div class="field"><label>Education <span class="required">*</span></label><select data-field="education" required>${selectOptions(["Secondary school", "Vocational training", "Some college/university", "Bachelor's degree", "Master's degree", "Doctoral degree", "Other"], state.forms.education)}</select></div>
+    <div class="field"><label>Primary language <span class="required">*</span></label><input class="input" data-field="primary_language" value="${val("primary_language")}" required></div>
+    <div class="field"><label>English fluency <span class="required">*</span></label><select data-field="english_fluency" required>${selectOptions(["Native or near-native", "Fluent", "Comfortable", "Limited"], state.forms.english_fluency)}</select></div>
+    <div class="field"><label>Country <span class="required">*</span></label><select data-field="country" required>${selectOptions(COUNTRY_OPTIONS, state.forms.country)}</select></div>
+    <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
   `);
   bindFields();
   document.querySelector("#back").onclick = () => go("eligibility");
   document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      { name: "age", label: "Age" },
+      { name: "gender", label: "Gender" },
+      { name: "education", label: "Education" },
+      { name: "primary_language", label: "Primary language" },
+      { name: "english_fluency", label: "English fluency" },
+      { name: "country", label: "Country" },
+      { name: "timezone", label: "Time zone" }
+    ])) return;
+    if (!requireNumericRange("age", "Age", 18, 70)) return;
     await logEvent("baseline_demographics", state.forms);
     go("sleep");
   };
 }
 
 function sleep() {
+  const sleepScales = [["sleep_quality", "Sleep quality last night"], ["chronotype", "Morningness vs eveningness"], ["caffeine", "Caffeine since waking"]];
   page(`
     <h1>Sleep and routines</h1>
     <p class="lead">These items help anchor daily variation.</p>
-    <div class="field"><label>Usual bedtime</label><input class="input" type="time" data-field="usual_bedtime" value="${val("usual_bedtime")}"></div>
-    <div class="field"><label>Usual wake time</label><input class="input" type="time" data-field="usual_waketime" value="${val("usual_waketime")}"></div>
-    <div class="field"><label>Hours slept last night</label><input class="input" inputmode="decimal" data-field="sleep_hours" value="${val("sleep_hours")}"></div>
-    ${scaleRows([["sleep_quality", "Sleep quality last night"], ["chronotype", "Morningness vs eveningness"], ["caffeine", "Caffeine since waking"]], "sleep", "Low", "High")}
+    <div class="field"><label>Usual bedtime <span class="required">*</span></label><input class="input" type="time" data-field="usual_bedtime" value="${val("usual_bedtime")}" required></div>
+    <div class="field"><label>Usual wake time <span class="required">*</span></label><input class="input" type="time" data-field="usual_waketime" value="${val("usual_waketime")}" required></div>
+    <div class="field"><label>Hours slept last night <span class="required">*</span></label><input class="input" inputmode="decimal" data-field="sleep_hours" value="${val("sleep_hours")}" required></div>
+    ${scaleRows(sleepScales, "sleep", "Low", "High")}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
   `);
   bindFields();
   document.querySelector("#back").onclick = () => go("demographics");
   document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      { name: "usual_bedtime", label: "Usual bedtime" },
+      { name: "usual_waketime", label: "Usual wake time" },
+      { name: "sleep_hours", label: "Hours slept last night" },
+      ...scaleFieldList(sleepScales, "sleep")
+    ])) return;
+    if (!requireNumericRange("sleep_hours", "Hours slept last night", 0, 24)) return;
     await logEvent("baseline_sleep", state.forms);
     go("baselineState");
   };
@@ -368,13 +481,19 @@ function baselineState() {
     ${scaleRows(panas, "panas", "Very slightly", "Extremely")}
     <h2>Context</h2>
     ${scaleRows(context, "ctx", "Low", "High")}
-    <div class="field"><label>Where are you?</label><select data-field="location_type">${selectOptions(["Home", "Work or school", "Public indoor place", "Outdoors", "In transit", "Other"], state.forms.location_type)}</select></div>
-    <div class="field"><label>Who is nearby?</label><select data-field="social_context">${selectOptions(["Alone", "One other person", "Several people", "Crowded place"], state.forms.social_context)}</select></div>
+    <div class="field"><label>Where are you? <span class="required">*</span></label><select data-field="location_type" required>${selectOptions(["Home", "Work or school", "Public indoor place", "Outdoors", "In transit", "Other"], state.forms.location_type)}</select></div>
+    <div class="field"><label>Who is nearby? <span class="required">*</span></label><select data-field="social_context" required>${selectOptions(["Alone", "One other person", "Several people", "Crowded place"], state.forms.social_context)}</select></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
   `);
   bindFields();
   document.querySelector("#back").onclick = () => go("sleep");
   document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      ...scaleFieldList(panas, "panas"),
+      ...scaleFieldList(context, "ctx"),
+      { name: "location_type", label: "Where are you?" },
+      { name: "social_context", label: "Who is nearby?" }
+    ])) return;
     await logEvent("baseline_state_context", state.forms);
     go("deviceCheck");
   };
@@ -401,13 +520,21 @@ function deviceCheck() {
       <p><strong>Detected device:</strong> ${html(device.viewport)}, ${html(device.platform || "unknown platform")}</p>
       <p>Please hold the phone near you, avoid covering the microphone, and use headphones only if they do not block speech recording.</p>
     </div>
-    <div class="field"><label>Are you using headphones?</label><select data-field="headphones">${selectOptions(["No", "Yes, wired", "Yes, wireless", "Not sure"], state.forms.headphones)}</select></div>
-    <div class="field"><label>Can you speak for about 60-90 seconds right now?</label><select data-field="safe_to_speak">${selectOptions(["Yes", "No"], state.forms.safe_to_speak)}</select></div>
+    <div class="field"><label>Are you using headphones? <span class="required">*</span></label><select data-field="headphones" required>${selectOptions(["No", "Yes, wired", "Yes, wireless", "Not sure"], state.forms.headphones)}</select></div>
+    <div class="field"><label>Can you speak for about 60-90 seconds right now? <span class="required">*</span></label><select data-field="safe_to_speak" required>${selectOptions(["Yes", "No"], state.forms.safe_to_speak)}</select></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
   `);
   bindFields();
   document.querySelector("#back").onclick = () => go("baselineState");
   document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      { name: "headphones", label: "Headphones" },
+      { name: "safe_to_speak", label: "Can speak right now" }
+    ])) return;
+    if (state.forms.safe_to_speak !== "Yes") {
+      showFormError("Please continue only when you can safely speak for 60-90 seconds.", ["safe_to_speak"]);
+      return;
+    }
     await logEvent("device_check", state.forms);
     assignPrompts();
     go("speech");
@@ -992,24 +1119,31 @@ function mot() {
 }
 
 function finalSurvey() {
+  const finalScales = [
+    ["task_difficulty", "Overall task difficulty"],
+    ["frustration", "Frustration or discomfort"],
+    ["privacy_concern", "Concern about audio/privacy"],
+    ["distraction", "Distraction during the session"],
+    ["usability", "Ease of using the study on this device"]
+  ];
   page(`
     <h1>Final questions</h1>
     <p class="lead">Last baseline feedback and interruption report.</p>
-    ${scaleRows([
-      ["task_difficulty", "Overall task difficulty"],
-      ["frustration", "Frustration or discomfort"],
-      ["privacy_concern", "Concern about audio/privacy"],
-      ["distraction", "Distraction during the session"],
-      ["usability", "Ease of using the study on this device"]
-    ], "final", "Low", "High")}
-    <div class="field"><label>Did anything interrupt you?</label><select data-field="final_interrupted">${selectOptions(["No", "Yes, once", "Yes, several times"], state.forms.final_interrupted)}</select></div>
-    <div class="field"><label>Approximate interruption duration</label><select data-field="final_interruption_duration">${selectOptions(["None", "Less than 1 minute", "1-5 minutes", "More than 5 minutes"], state.forms.final_interruption_duration)}</select></div>
-    <div class="field"><label>Any adverse event, concern, or feedback?</label><textarea data-field="final_feedback">${val("final_feedback")}</textarea></div>
+    ${scaleRows(finalScales, "final", "Low", "High")}
+    <div class="field"><label>Did anything interrupt you? <span class="required">*</span></label><select data-field="final_interrupted" required>${selectOptions(["No", "Yes, once", "Yes, several times"], state.forms.final_interrupted)}</select></div>
+    <div class="field"><label>Approximate interruption duration <span class="required">*</span></label><select data-field="final_interruption_duration" required>${selectOptions(["None", "Less than 1 minute", "1-5 minutes", "More than 5 minutes"], state.forms.final_interruption_duration)}</select></div>
+    <div class="field"><label>Any adverse event, concern, or feedback? <span class="required">*</span></label><textarea data-field="final_feedback" required placeholder="Write None if there was nothing unusual.">${val("final_feedback")}</textarea></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Save baseline</button></div>
   `);
   bindFields();
   document.querySelector("#back").onclick = () => go("mot");
   document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      ...scaleFieldList(finalScales, "final"),
+      { name: "final_interrupted", label: "Interrupted" },
+      { name: "final_interruption_duration", label: "Interruption duration" },
+      { name: "final_feedback", label: "Adverse event, concern, or feedback" }
+    ])) return;
     await logEvent("baseline_complete", { forms: state.forms, assignments: state.assignments, tmb: state.tmb });
     go("emaHome");
   };
@@ -1275,11 +1409,21 @@ function render() {
 }
 
 async function init() {
-  state.config = await api("/api/config");
-  restoreLocal();
-  render();
-  logEvent("app_open", params());
-  document.addEventListener("visibilitychange", () => logEvent("visibility_change", { visibilityState: document.visibilityState }));
+  try {
+    state.config = await api("/api/config");
+    restoreLocal();
+    render();
+    logEvent("app_open", params());
+    document.addEventListener("visibilitychange", () => logEvent("visibility_change", { visibilityState: document.visibilityState }));
+  } catch (err) {
+    app.innerHTML = `
+      <section class="view">
+        <h1>Study app could not start</h1>
+        <p class="lead">Please reload this page. If it still does not load, try opening the link again in Safari or Chrome.</p>
+        <div class="form-error">${html(err.message || "Startup failed")}</div>
+      </section>
+    `;
+  }
 }
 
 init();
