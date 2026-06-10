@@ -13,6 +13,7 @@ data/uploads/
 data/*.jsonl
 data/*.csv
 data/*.zip
+exports/
 
 # Local temporary output.
 tmp/
