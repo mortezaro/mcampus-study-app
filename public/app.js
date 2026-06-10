@@ -121,6 +121,7 @@ const state = {
   cognitiveOrder: [],
   currentEma: "",
   baselineComplete: false,
+  recordings: {},
   recorder: null
 };
 
@@ -141,6 +142,10 @@ const COGNITIVE_STEP_BY_TASK = {
 
 function html(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function isSmartphone() {
+  return /iPhone|iPod|Android.*Mobile/i.test(navigator.userAgent);
 }
 
 function uidHash(seed, max) {
@@ -200,7 +205,8 @@ function saveLocal() {
     cognitiveReturn: state.cognitiveReturn,
     cognitiveOrder: state.cognitiveOrder,
     currentEma: state.currentEma,
-    baselineComplete: state.baselineComplete
+    baselineComplete: state.baselineComplete,
+    recordings: state.recordings
   }));
 }
 
@@ -341,6 +347,21 @@ function scaleRows(items, prefix, min = "Low", max = "High") {
 }
 
 function welcome() {
+  if (!isSmartphone() && !LOCALHOST && !DEMO_MODE) {
+    page(`
+      <h1>Smartphone required</h1>
+      <p class="lead">This study must be completed on an iPhone or Android phone.</p>
+      <div class="band">
+        <p>Please reopen your Prolific study link on your smartphone. Your phone needs a working microphone and internet connection.</p>
+      </div>
+    `);
+    logEvent("device_ineligible", {
+      reason: "smartphone_required",
+      userAgent: navigator.userAgent,
+      viewport: `${window.innerWidth}x${window.innerHeight}`
+    });
+    return;
+  }
   page(`
     <h1>Start your M-CAMPUS session</h1>
     <p class="lead">This study includes a baseline session, short questionnaires, randomized speech tasks, cognitive tasks, and a 12-day daily check-in dashboard in one mobile-friendly flow.</p>
@@ -534,10 +555,13 @@ function baselineState() {
 }
 
 function deviceCheck() {
+  const userAgent = navigator.userAgent;
+  const isPhone = isSmartphone();
   const device = {
     platform: navigator.platform,
     language: navigator.language,
-    userAgent: navigator.userAgent,
+    userAgent,
+    isPhone,
     viewport: `${window.innerWidth}x${window.innerHeight}`,
     screen: `${window.screen?.width || ""}x${window.screen?.height || ""}`,
     colorDepth: window.screen?.colorDepth || null,
@@ -576,6 +600,11 @@ function deviceCheck() {
       showFormError("Please continue only when you can safely speak for 60-90 seconds.", ["safe_to_speak"]);
       return;
     }
+    if (!device.isPhone && !LOCALHOST && !DEMO_MODE) {
+      showFormError("This study must be completed on a smartphone. Please reopen your Prolific study link on an iPhone or Android phone.");
+      await logEvent("device_ineligible", { reason: "smartphone_required", device });
+      return;
+    }
     await logEvent("device_check", state.forms);
     assignPrompts();
     go("speech");
@@ -606,13 +635,13 @@ function assignPrompts() {
   saveLocal();
 }
 
-function recorderMarkup(task, session, maxSeconds = 120, minSeconds = 40, guidance = "") {
+function recorderMarkup(task, session, maxSeconds = 300, minSeconds = 40, guidance = "", completed = false) {
   const help = guidance || `Aim for 60-90 seconds if you can. Recording auto-stops at ${maxSeconds} seconds.`;
   return `
-    <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-min="${minSeconds}" data-target="${maxSeconds}">
-      <div class="meter"><span></span></div>
-      <div class="status">Ready to record</div>
-      <button class="button" data-action="start">Start recording</button>
+    <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-min="${minSeconds}" data-target="${maxSeconds}" data-completed="${completed ? "true" : "false"}">
+      <div class="meter"><span style="${completed ? "width:100%" : ""}"></span></div>
+      <div class="status ${completed ? "ok" : ""}">${completed ? "Recording already uploaded" : "Ready to record"}</div>
+      <button class="button" data-action="start" ${completed ? "disabled" : ""}>${completed ? "Uploaded" : "Start recording"}</button>
       <button class="button danger" data-action="stop" disabled>Stop and upload</button>
       ${DEMO_MODE ? `<button class="button secondary" data-action="demo">Demo: mark uploaded</button>` : ""}
       <audio controls hidden></audio>
@@ -629,12 +658,19 @@ function attachRecorder(task, session, done) {
   const stopButton = root.querySelector("[data-action='stop']");
   const demoButton = root.querySelector("[data-action='demo']");
   const audio = root.querySelector("audio");
+  const backButton = document.querySelector("#back");
   const target = Number(root.dataset.target || 60);
   const minSeconds = Number(root.dataset.min || 60);
+  const completed = root.dataset.completed === "true";
   let mediaRecorder;
   let chunks = [];
   let startedAt = 0;
   let timer;
+
+  if (completed) {
+    done();
+    return;
+  }
 
   const stopRecording = () => {
     stopButton.disabled = true;
@@ -658,21 +694,33 @@ function attachRecorder(task, session, done) {
         audio.hidden = false;
         status.textContent = "Uploading recording...";
         status.className = "status warn";
-        await fetch(`/api/upload?participantId=${encodeURIComponent(state.participantId)}&task=${encodeURIComponent(task)}&session=${encodeURIComponent(session)}`, {
-          method: "POST",
-          headers: { "content-type": blob.type },
-          body: blob
-        });
-        status.textContent = seconds < minSeconds ? "Recording uploaded, but it is shorter than the production minimum" : "Recording uploaded";
-        status.className = seconds < minSeconds ? "status warn" : "status ok";
-        stream.getTracks().forEach(track => track.stop());
-        await logEvent("recording_complete", { task, session, seconds, minSeconds, maxSeconds: target, tooShort: seconds < minSeconds });
-        done();
+        try {
+          const response = await fetch(`/api/upload?participantId=${encodeURIComponent(state.participantId)}&task=${encodeURIComponent(task)}&session=${encodeURIComponent(session)}`, {
+            method: "POST",
+            headers: { "content-type": blob.type },
+            body: blob
+          });
+          if (!response.ok) throw new Error(await response.text());
+          status.textContent = seconds < minSeconds ? "Recording uploaded, but it is shorter than the production minimum" : "Recording uploaded";
+          status.className = seconds < minSeconds ? "status warn" : "status ok";
+          await logEvent("recording_complete", { task, session, seconds, minSeconds, maxSeconds: target, tooShort: seconds < minSeconds });
+          done();
+        } catch (err) {
+          meter.style.width = "0%";
+          startButton.disabled = false;
+          status.textContent = "Upload failed. Please check your connection and record again.";
+          status.className = "status warn";
+          await logEvent("recording_upload_failed", { task, session, seconds, message: err.message });
+        } finally {
+          if (backButton) backButton.disabled = false;
+          stream.getTracks().forEach(track => track.stop());
+        }
       };
       startedAt = Date.now();
       mediaRecorder.start();
       startButton.disabled = true;
       stopButton.disabled = true;
+      if (backButton) backButton.disabled = true;
       status.textContent = "Recording...";
       timer = setInterval(() => {
         const elapsed = (Date.now() - startedAt) / 1000;
@@ -704,14 +752,17 @@ function attachRecorder(task, session, done) {
 
 function speechTask() {
   assignPrompts();
+  const completed = Boolean(state.recordings.baselineOpenSpeech);
   page(`
     <h1>Spontaneous speech</h1>
     <p class="lead">One prompt is randomly selected for each participant. Please keep speaking for about 60-90 seconds if you can.</p>
     <div class="prompt">${html(state.assignments.speechPrompt)}</div>
-    ${recorderMarkup("baseline_open_speech", "baseline-open", 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
-    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
+    ${recorderMarkup("baseline_open_speech", "baseline-open", 300, 40, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("baseline_open_speech", "baseline-open", () => {
+    state.recordings.baselineOpenSpeech = true;
+    saveLocal();
     document.querySelector("#next").disabled = false;
   });
   document.querySelector("#back").onclick = () => go("deviceCheck");
@@ -770,15 +821,18 @@ function pictureStimulus(pic) {
 function pictureTask() {
   assignPrompts();
   const pic = state.assignments.picture;
+  const completed = Boolean(state.recordings.baselinePictureSpeech);
   page(`
     <h1>Picture description</h1>
     <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
     ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
-    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
+    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 300, 20, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("baseline_picture_speech", `picture-${pic.id}`, () => {
+    state.recordings.baselinePictureSpeech = pic.id;
+    saveLocal();
     document.querySelector("#next").disabled = false;
   });
   document.querySelector("#back").onclick = () => go("speech");
@@ -899,7 +953,7 @@ const TMB_TASKS = {
     next: "mot",
     baselineParams: { ntrials: "150", nopractice: "optional", chooseinput: "false" },
     emaParams: { ntrials: "30", nopractice: "true", chooseinput: "false" },
-    instructions: "Tap city pictures as they appear. Do not tap mountain pictures.",
+    instructions: "Tap once for every city picture. Do not tap mountain pictures. Cities appear on most trials, so you should be tapping frequently.",
     baselineDuration: "150 image transitions, about 2 minutes plus instructions.",
     emaDuration: "30 image transitions, about 24 seconds plus instructions."
   },
@@ -1254,6 +1308,13 @@ function finalSurvey() {
       { name: "final_interrupted", label: "Interrupted" },
       { name: "final_interruption_duration", label: "Interruption duration" }
     ])) return;
+    if (state.baselineComplete) {
+      go("baselineComplete");
+      return;
+    }
+    const saveButton = document.querySelector("#next");
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
     state.baselineComplete = true;
     saveLocal();
     await logEvent("baseline_complete", { forms: state.forms, assignments: state.assignments, tmb: state.tmb });
@@ -1422,12 +1483,13 @@ function emaSurvey() {
 
 function emaSpeech() {
   const draft = ensureEmaDraft();
+  const completed = Boolean(draft.recordings.openSpeech);
   page(`
     <h1>Spontaneous speech</h1>
     <p class="lead">Please keep speaking for about 60-90 seconds if you can.</p>
     <div class="prompt">${html(draft.spontaneousPrompt)}</div>
-    ${recorderMarkup("ema_open_speech", draft.key, 120, 40, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
-    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
+    ${recorderMarkup("ema_open_speech", draft.key, 300, 40, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("ema_open_speech", draft.key, () => {
     draft.recordings.openSpeech = true;
@@ -1441,13 +1503,14 @@ function emaSpeech() {
 function emaPicture() {
   const draft = ensureEmaDraft();
   const pic = draft.picture;
+  const completed = draft.recordings.pictureSpeech === pic.id;
   page(`
     <h1>Picture description</h1>
     <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
     ${pictureStimulus(pic)}
     <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 120, 20, "Aim for 60-90 seconds if you can. You may continue up to 120 seconds.")}
-    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" disabled>Continue</button></div>
+    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 300, 20, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("ema_picture_speech", `${draft.key}-${pic.id}`, () => {
     draft.recordings.pictureSpeech = pic.id;
@@ -1484,6 +1547,13 @@ function emaFinal() {
     go(lastCognitiveStep());
   };
   document.querySelector("#save").onclick = async () => {
+    if (state.ema[draft.key]?.done) {
+      go("emaComplete");
+      return;
+    }
+    const saveButton = document.querySelector("#save");
+    saveButton.disabled = true;
+    saveButton.textContent = "Saving...";
     draft.final = {
       difficulty: state.forms[`ema_final_${draft.key}_difficulty`],
       frustration: state.forms[`ema_final_${draft.key}_frustration`],
