@@ -1,7 +1,9 @@
 const app = document.querySelector("#app");
 
 const LOCALHOST = location.hostname === "127.0.0.1" || location.hostname === "localhost";
-const DEMO_MODE = new URLSearchParams(window.location.search).get("demo") === "1";
+const QUERY = new URLSearchParams(window.location.search);
+const DEMO_MODE = QUERY.get("demo") === "1";
+const STUDY_MODE = QUERY.get("mode") === "qualification" ? "qualification" : "main";
 
 const SPEECH_PROMPTS = [
   "Describe situations in your everyday life when your thinking tends to feel especially clear or sharp. What are you usually doing, and what do you think helps?",
@@ -158,13 +160,26 @@ function uidHash(seed, max) {
 }
 
 function params() {
-  const query = new URLSearchParams(window.location.search);
+  const query = QUERY;
   const participantId = query.get("PROLIFIC_PID") || query.get("participant") || query.get("pid") || (LOCALHOST ? localStorage.getItem("mcampusParticipantId") : "");
   return {
     participantId: participantId || "",
     studyId: query.get("STUDY_ID") || "",
     sessionId: query.get("SESSION_ID") || ""
   };
+}
+
+function localStateKey() {
+  const suffix = STUDY_MODE === "qualification" ? ":qualification" : "";
+  return `mcampus:${state.participantId}:state${suffix}`;
+}
+
+function prolificCompletionUrl() {
+  const code = String(QUERY.get("completionCode") || "").trim();
+  if (/^[A-Z0-9]{6,16}$/i.test(code)) {
+    return `https://app.prolific.com/submissions/complete?cc=${encodeURIComponent(code)}`;
+  }
+  return state.config.prolificCompletionUrl;
 }
 
 async function api(path, options = {}) {
@@ -192,7 +207,7 @@ async function logEvent(type, payload = {}) {
 
 function saveLocal() {
   localStorage.setItem("mcampusParticipantId", state.participantId);
-  localStorage.setItem(`mcampus:${state.participantId}:state`, JSON.stringify({
+  localStorage.setItem(localStateKey(), JSON.stringify({
     step: state.step,
     consent: state.consent,
     eligible: state.eligible,
@@ -216,14 +231,14 @@ function restoreLocal() {
   state.studyId = p.studyId;
   state.sessionId = p.sessionId;
   if (new URLSearchParams(window.location.search).get("reset") === "1" && state.participantId) {
-    localStorage.removeItem(`mcampus:${state.participantId}:state`);
+    localStorage.removeItem(localStateKey());
   }
-  const saved = state.participantId && localStorage.getItem(`mcampus:${state.participantId}:state`);
+  const saved = state.participantId && localStorage.getItem(localStateKey());
   if (!saved) return;
   try {
     Object.assign(state, JSON.parse(saved));
   } catch {
-    localStorage.removeItem(`mcampus:${state.participantId}:state`);
+    localStorage.removeItem(localStateKey());
   }
 }
 
@@ -235,6 +250,16 @@ function go(step) {
 }
 
 function topbar() {
+  if (STUDY_MODE === "qualification") {
+    const qSteps = ["qWelcome", "qConsent", "qProfile", "qSpeech", "qComplete"];
+    const qIndex = Math.max(0, qSteps.indexOf(state.step));
+    return `
+      <header class="topbar">
+        <div class="brand"><strong>M-CAMPUS</strong><span>Voice qualification</span></div>
+        <div class="progress">${state.step === "qComplete" ? "Done" : `${qIndex + 1}/${qSteps.length}`}</div>
+      </header>
+    `;
+  }
   const idx = Math.max(0, stepOrder.indexOf(state.step));
   const progress = state.step === "done" ? "Done" : `${idx + 1}/${stepOrder.length}`;
   return `
@@ -1675,7 +1700,139 @@ function done() {
   `);
 }
 
+function qualificationWelcome() {
+  if (!isSmartphone() && !LOCALHOST && !DEMO_MODE) {
+    page(`
+      <h1>Smartphone required</h1>
+      <p class="lead">This qualification task must be completed on an iPhone or Android phone.</p>
+      <div class="band"><p>Please reopen your Prolific study link on a phone with a working microphone.</p></div>
+    `);
+    logEvent("qualification_device_ineligible", { reason: "smartphone_required", userAgent: navigator.userAgent });
+    return;
+  }
+  page(`
+    <h1>Voice qualification</h1>
+    <p class="lead">This short study asks about your language background and records one spontaneous speech sample.</p>
+    <div class="band">
+      <p>The task takes about 3 minutes. Use your smartphone in a quiet place. Your speech should be natural and unprepared.</p>
+    </div>
+    <div class="actions"><button class="button" id="next">Continue</button></div>
+  `);
+  document.querySelector("#next").onclick = () => go("qConsent");
+}
+
+function qualificationConsent() {
+  page(`
+    <h1>Consent</h1>
+    <p class="lead">Your voice recording and language-background answers will be reviewed to determine whether you may be invited to a longer research study.</p>
+    <div class="band">
+      <p>Voice recordings can be identifiable. Do not say your name, address, employer, passwords, or other private information. Participation is voluntary and this qualification does not guarantee an invitation to the longer study.</p>
+    </div>
+    <label class="choice">
+      <input id="qConsent" type="checkbox" ${state.consent ? "checked" : ""}>
+      <span>I understand the information above and consent to provide this short voice recording and language-background information for research recruitment and quality review.</span>
+    </label>
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${state.consent ? "" : "disabled"}>Continue</button></div>
+  `);
+  document.querySelector("#qConsent").onchange = event => {
+    state.consent = event.target.checked;
+    document.querySelector("#next").disabled = !state.consent;
+    saveLocal();
+  };
+  document.querySelector("#back").onclick = () => go("qWelcome");
+  document.querySelector("#next").onclick = () => go("qProfile");
+}
+
+function qualificationProfile() {
+  page(`
+    <h1>Language background</h1>
+    <p class="lead">Please answer accurately. Different English varieties are legitimate; these questions define the specific population needed for this study.</p>
+    <div class="field"><label>When did you begin using English regularly? <span class="required">*</span></label><select data-field="q_english_start_age" required>${selectOptions(["From birth", "Before age 3", "Age 3-5", "Age 6-12", "After age 12"], state.forms.q_english_start_age)}</select></div>
+    <div class="field"><label>Where did you spend most of ages 5-18? <span class="required">*</span></label><select data-field="q_childhood_region" required>${selectOptions(["United States", "Mostly United States and partly elsewhere", "Outside the United States"], state.forms.q_childhood_region)}</select></div>
+    <div class="field"><label>Where did you complete most primary and secondary schooling? <span class="required">*</span></label><select data-field="q_school_region" required>${selectOptions(["United States", "Mostly United States and partly elsewhere", "Outside the United States"], state.forms.q_school_region)}</select></div>
+    <div class="field"><label>How would you describe your everyday English dialect or accent? <span class="required">*</span></label><input class="input" data-field="q_english_dialect" value="${val("q_english_dialect")}" placeholder="For example: American English, Southern US English" required></div>
+    <div class="field"><label>Are you bilingual or multilingual? <span class="required">*</span></label><select data-field="q_multilingual" required>${selectOptions(["No, English only", "Yes, bilingual", "Yes, multilingual", "Prefer not to say"], state.forms.q_multilingual)}</select></div>
+    <label class="choice">
+      <input type="checkbox" data-field="q_authenticity" ${state.forms.q_authenticity ? "checked" : ""}>
+      <span>I will answer spontaneously in my own words without notes, a prepared script, a website, an AI tool, or another device.</span>
+    </label>
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
+  `);
+  bindFields();
+  document.querySelector("#back").onclick = () => go("qConsent");
+  document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      { name: "q_english_start_age", label: "Age English use began" },
+      { name: "q_childhood_region", label: "Childhood region" },
+      { name: "q_school_region", label: "Schooling region" },
+      { name: "q_english_dialect", label: "English dialect or accent" },
+      { name: "q_multilingual", label: "Bilingual or multilingual" },
+      { name: "q_authenticity", label: "Spontaneous speech agreement" }
+    ])) return;
+    if (state.forms.q_authenticity !== true) {
+      showFormError("Please agree to provide an unaided, spontaneous response.", ["q_authenticity"]);
+      return;
+    }
+    await logEvent("qualification_profile", {
+      englishStartAge: state.forms.q_english_start_age,
+      childhoodRegion: state.forms.q_childhood_region,
+      schoolRegion: state.forms.q_school_region,
+      englishDialect: state.forms.q_english_dialect,
+      multilingual: state.forms.q_multilingual
+    });
+    go("qSpeech");
+  };
+}
+
+function qualificationSpeech() {
+  const completed = Boolean(state.recordings.qualificationSpeech);
+  const prompt = groundedSpeechPrompt(promptBank()[uidHash(`${state.participantId}:qualification:speech`, promptBank().length)]);
+  page(`
+    <h1>Spontaneous voice sample</h1>
+    <p class="lead">The prompt appears only after recording starts. Begin answering immediately; normal pauses, corrections, and hesitations are welcome.</p>
+    <div class="band"><p>Do not use notes, websites, AI tools, or another device. There is no perfect answer.</p></div>
+    <div class="prompt" data-live-stimulus tabindex="-1" ${completed ? "" : "hidden"}>${html(prompt)}</div>
+    ${recorderMarkup("qualification_open_speech", "qualification", 120, 30, "Please speak naturally for about 45-90 seconds. Recording stops after 2 minutes.", completed, true)}
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Finish</button></div>
+  `);
+  attachRecorder("qualification_open_speech", "qualification", () => {
+    state.recordings.qualificationSpeech = true;
+    saveLocal();
+    document.querySelector("#next").disabled = false;
+  });
+  document.querySelector("#back").onclick = () => go("qProfile");
+  document.querySelector("#next").onclick = async () => {
+    await logEvent("qualification_complete", {
+      profile: {
+        englishStartAge: state.forms.q_english_start_age,
+        childhoodRegion: state.forms.q_childhood_region,
+        schoolRegion: state.forms.q_school_region,
+        englishDialect: state.forms.q_english_dialect,
+        multilingual: state.forms.q_multilingual
+      }
+    });
+    go("qComplete");
+  };
+}
+
+function qualificationComplete() {
+  page(`
+    <h1>Qualification complete</h1>
+    <p class="lead">Your answers and voice sample have been saved.</p>
+    <div class="band"><p>This qualification does not guarantee an invitation to the longer study. Please return to Prolific to submit this task.</p></div>
+    <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+  `);
+}
+
 function render() {
+  if (STUDY_MODE === "qualification") {
+    if (state.step === "qConsent") qualificationConsent();
+    else if (state.step === "qProfile") qualificationProfile();
+    else if (state.step === "qSpeech") qualificationSpeech();
+    else if (state.step === "qComplete") qualificationComplete();
+    else qualificationWelcome();
+    return;
+  }
   if (state.step === "welcome") welcome();
   else if (state.step === "consent") consent();
   else if (state.step === "eligibility") eligibility();
@@ -1706,6 +1863,7 @@ async function init() {
   try {
     state.config = await api("/api/config");
     restoreLocal();
+    if (STUDY_MODE === "qualification" && !String(state.step).startsWith("q")) state.step = "qWelcome";
     render();
     logEvent("app_open", params());
     document.addEventListener("visibilitychange", () => logEvent("visibility_change", { visibilityState: document.visibilityState }));
