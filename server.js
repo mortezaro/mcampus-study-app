@@ -151,6 +151,7 @@ function summarizeParticipants(rows) {
         emaCompleted: 0,
         emaSessions: {},
         uploads: [],
+        recordingEvents: [],
         tmbEvents: [],
         device: null,
         eventCount: 0
@@ -195,6 +196,18 @@ function summarizeParticipants(rows) {
         session: row.session,
         bytes: row.bytes,
         file: row.file
+      });
+    }
+
+    if (row.type === "recording_complete") {
+      summary.recordingEvents.push({
+        receivedAt: row.receivedAt,
+        task: row.payload?.task || null,
+        session: row.payload?.session || null,
+        seconds: row.payload?.seconds || null,
+        tooShort: Boolean(row.payload?.tooShort),
+        visibilityChanges: row.payload?.visibilityChanges || 0,
+        hiddenMs: row.payload?.hiddenMs || 0
       });
     }
 

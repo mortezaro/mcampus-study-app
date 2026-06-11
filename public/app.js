@@ -419,7 +419,9 @@ function consent() {
 function eligibility() {
   const q = [
     ["age18_70", "I am between 18 and 70 years old."],
-    ["english", "I am a native English speaker."],
+    ["english_early", "English was one of the main languages I used before age 6."],
+    ["us_raised", "I lived in the United States for most of ages 5-18 and completed most of my schooling there."],
+    ["american_english", "My everyday spoken English is an American English variety."],
     ["smartphone", "I have access to a smartphone with a working microphone and internet connection."],
     ["daily", "I am willing to complete 3 short sessions per day for 12 days."],
     ["audio", "I am willing to provide short audio recordings."],
@@ -472,6 +474,9 @@ function demographics() {
     <div class="field"><label>Gender <span class="required">*</span></label><select data-field="gender" required>${selectOptions(["Woman", "Man", "Non-binary", "Prefer to self-describe", "Prefer not to say"], state.forms.gender)}</select></div>
     <div class="field"><label>Education <span class="required">*</span></label><select data-field="education" required>${selectOptions(["Secondary school", "Vocational training", "Some college/university", "Bachelor's degree", "Master's degree", "Doctoral degree", "Other"], state.forms.education)}</select></div>
     <div class="field"><label>Are you bilingual or multilingual? <span class="required">*</span></label><select data-field="multilingual" required>${selectOptions(["No, English only", "Yes, bilingual", "Yes, multilingual", "Prefer not to say"], state.forms.multilingual)}</select></div>
+    <div class="field"><label>When did you begin using English regularly? <span class="required">*</span></label><select data-field="english_start_age" required>${selectOptions(["From birth", "Before age 3", "Age 3-5", "Age 6-12", "After age 12"], state.forms.english_start_age)}</select></div>
+    <div class="field"><label>Where did you spend most of ages 5-18? <span class="required">*</span></label><select data-field="childhood_region" required>${selectOptions(["United States", "Mostly United States and partly elsewhere", "Outside the United States"], state.forms.childhood_region)}</select></div>
+    <div class="field"><label>How would you describe your everyday English dialect or accent? <span class="required">*</span></label><input class="input" data-field="english_dialect" value="${val("english_dialect")}" placeholder="For example: American English, Southern US English" required></div>
     <div class="field"><label>Country <span class="required">*</span></label><select data-field="country" required>${selectOptions(COUNTRY_OPTIONS, state.forms.country)}</select></div>
     <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
@@ -484,6 +489,9 @@ function demographics() {
       { name: "gender", label: "Gender" },
       { name: "education", label: "Education" },
       { name: "multilingual", label: "Bilingual or multilingual" },
+      { name: "english_start_age", label: "Age English use began" },
+      { name: "childhood_region", label: "Childhood region" },
+      { name: "english_dialect", label: "English dialect or accent" },
       { name: "country", label: "Country" },
       { name: "timezone", label: "Time zone" }
     ])) return;
@@ -587,6 +595,10 @@ function deviceCheck() {
     </div>
     <div class="field"><label>Are you using headphones? <span class="required">*</span></label><select data-field="headphones" required>${selectOptions(["No", "Yes, wired", "Yes, wireless", "Not sure"], state.forms.headphones)}</select></div>
     <div class="field"><label>Can you speak for about 60-90 seconds right now? <span class="required">*</span></label><select data-field="safe_to_speak" required>${selectOptions(["Yes", "No"], state.forms.safe_to_speak)}</select></div>
+    <label class="choice">
+      <input type="checkbox" data-field="speech_authenticity" ${state.forms.speech_authenticity ? "checked" : ""}>
+      <span>I will answer spontaneously in my own words without reading from notes, a prepared script, a website, or an AI tool, and without using another device for help.</span>
+    </label>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
   `);
   bindFields();
@@ -594,10 +606,15 @@ function deviceCheck() {
   document.querySelector("#next").onclick = async () => {
     if (!requireFields([
       { name: "headphones", label: "Headphones" },
-      { name: "safe_to_speak", label: "Can speak right now" }
+      { name: "safe_to_speak", label: "Can speak right now" },
+      { name: "speech_authenticity", label: "Spontaneous speech agreement" }
     ])) return;
     if (state.forms.safe_to_speak !== "Yes") {
       showFormError("Please continue only when you can safely speak for 60-90 seconds.", ["safe_to_speak"]);
+      return;
+    }
+    if (state.forms.speech_authenticity !== true) {
+      showFormError("Please agree to answer the speech tasks spontaneously without scripts, websites, AI tools, or another device.", ["speech_authenticity"]);
       return;
     }
     if (!device.isPhone && !LOCALHOST && !DEMO_MODE) {
@@ -619,6 +636,10 @@ function pictureBank() {
   return PICTURES;
 }
 
+function groundedSpeechPrompt(prompt) {
+  return `Begin by naming one object you can see near you right now and saying where it is. Then answer this prompt: ${prompt}`;
+}
+
 function assignPrompts() {
   if (!state.assignments.speechPrompt) {
     const prompts = promptBank();
@@ -635,10 +656,10 @@ function assignPrompts() {
   saveLocal();
 }
 
-function recorderMarkup(task, session, maxSeconds = 300, minSeconds = 40, guidance = "", completed = false) {
+function recorderMarkup(task, session, maxSeconds = 300, minSeconds = 40, guidance = "", completed = false, revealPrompt = false) {
   const help = guidance || `Aim for 60-90 seconds if you can. Recording auto-stops at ${maxSeconds} seconds.`;
   return `
-    <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-min="${minSeconds}" data-target="${maxSeconds}" data-completed="${completed ? "true" : "false"}">
+    <div class="recorder" data-recorder data-task="${html(task)}" data-session="${html(session)}" data-min="${minSeconds}" data-target="${maxSeconds}" data-completed="${completed ? "true" : "false"}" data-reveal-prompt="${revealPrompt ? "true" : "false"}">
       <div class="meter"><span style="${completed ? "width:100%" : ""}"></span></div>
       <div class="status ${completed ? "ok" : ""}">${completed ? "Recording already uploaded" : "Ready to record"}</div>
       <button class="button" data-action="start" ${completed ? "disabled" : ""}>${completed ? "Uploaded" : "Start recording"}</button>
@@ -662,10 +683,24 @@ function attachRecorder(task, session, done) {
   const target = Number(root.dataset.target || 60);
   const minSeconds = Number(root.dataset.min || 60);
   const completed = root.dataset.completed === "true";
+  const revealPrompt = root.dataset.revealPrompt === "true";
+  const liveStimuli = document.querySelectorAll("[data-live-stimulus]");
   let mediaRecorder;
   let chunks = [];
   let startedAt = 0;
   let timer;
+  let visibilityChanges = 0;
+  let hiddenStartedAt = 0;
+  let hiddenMs = 0;
+
+  const trackVisibility = () => {
+    visibilityChanges += 1;
+    if (document.visibilityState === "hidden") hiddenStartedAt = Date.now();
+    else if (hiddenStartedAt) {
+      hiddenMs += Date.now() - hiddenStartedAt;
+      hiddenStartedAt = 0;
+    }
+  };
 
   if (completed) {
     done();
@@ -687,6 +722,8 @@ function attachRecorder(task, session, done) {
       };
       mediaRecorder.onstop = async () => {
         clearInterval(timer);
+        document.removeEventListener("visibilitychange", trackVisibility);
+        if (hiddenStartedAt) hiddenMs += Date.now() - hiddenStartedAt;
         meter.style.width = "100%";
         const seconds = Math.round((Date.now() - startedAt) / 1000);
         const blob = new Blob(chunks, { type: mediaRecorder.mimeType || "audio/webm" });
@@ -703,7 +740,16 @@ function attachRecorder(task, session, done) {
           if (!response.ok) throw new Error(await response.text());
           status.textContent = seconds < minSeconds ? "Recording uploaded, but it is shorter than the production minimum" : "Recording uploaded";
           status.className = seconds < minSeconds ? "status warn" : "status ok";
-          await logEvent("recording_complete", { task, session, seconds, minSeconds, maxSeconds: target, tooShort: seconds < minSeconds });
+          await logEvent("recording_complete", {
+            task,
+            session,
+            seconds,
+            minSeconds,
+            maxSeconds: target,
+            tooShort: seconds < minSeconds,
+            visibilityChanges,
+            hiddenMs
+          });
           done();
         } catch (err) {
           meter.style.width = "0%";
@@ -718,9 +764,17 @@ function attachRecorder(task, session, done) {
       };
       startedAt = Date.now();
       mediaRecorder.start();
+      document.addEventListener("visibilitychange", trackVisibility);
       startButton.disabled = true;
       stopButton.disabled = true;
       if (backButton) backButton.disabled = true;
+      if (revealPrompt) {
+        liveStimuli.forEach(node => {
+          node.hidden = false;
+        });
+        const focusTarget = document.querySelector("[data-live-stimulus][tabindex]");
+        if (focusTarget) focusTarget.focus();
+      }
       status.textContent = "Recording...";
       timer = setInterval(() => {
         const elapsed = (Date.now() - startedAt) / 1000;
@@ -755,9 +809,10 @@ function speechTask() {
   const completed = Boolean(state.recordings.baselineOpenSpeech);
   page(`
     <h1>Spontaneous speech</h1>
-    <p class="lead">One prompt is randomly selected for each participant. Please keep speaking for about 60-90 seconds if you can.</p>
-    <div class="prompt">${html(state.assignments.speechPrompt)}</div>
-    ${recorderMarkup("baseline_open_speech", "baseline-open", 300, 40, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <p class="lead">The prompt appears only after recording begins. Respond immediately in your own words; natural pauses and hesitations are expected.</p>
+    <div class="band"><p>Do not read a prepared answer or use notes, websites, AI tools, or another device.</p></div>
+    <div class="prompt" data-live-stimulus tabindex="-1" ${completed ? "" : "hidden"}>${html(groundedSpeechPrompt(state.assignments.speechPrompt))}</div>
+    ${recorderMarkup("baseline_open_speech", "baseline-open", 300, 40, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed, true)}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("baseline_open_speech", "baseline-open", () => {
@@ -825,9 +880,9 @@ function pictureTask() {
   page(`
     <h1>Picture description</h1>
     <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
-    ${pictureStimulus(pic)}
-    <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 300, 20, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <div data-live-stimulus ${completed ? "" : "hidden"}>${pictureStimulus(pic)}</div>
+    <div class="prompt" data-live-stimulus tabindex="-1" ${completed ? "" : "hidden"}>${html(pic.prompt)}</div>
+    ${recorderMarkup("baseline_picture_speech", `picture-${pic.id}`, 300, 20, "The picture appears after recording begins. Aim for 60-90 seconds if you can; you may continue for up to 5 minutes.", completed, true)}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("baseline_picture_speech", `picture-${pic.id}`, () => {
@@ -1486,9 +1541,10 @@ function emaSpeech() {
   const completed = Boolean(draft.recordings.openSpeech);
   page(`
     <h1>Spontaneous speech</h1>
-    <p class="lead">Please keep speaking for about 60-90 seconds if you can.</p>
-    <div class="prompt">${html(draft.spontaneousPrompt)}</div>
-    ${recorderMarkup("ema_open_speech", draft.key, 300, 40, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <p class="lead">The prompt appears only after recording begins. Respond immediately in your own words; natural pauses and hesitations are expected.</p>
+    <div class="band"><p>Do not read a prepared answer or use notes, websites, AI tools, or another device.</p></div>
+    <div class="prompt" data-live-stimulus tabindex="-1" ${completed ? "" : "hidden"}>${html(groundedSpeechPrompt(draft.spontaneousPrompt))}</div>
+    ${recorderMarkup("ema_open_speech", draft.key, 300, 40, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed, true)}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("ema_open_speech", draft.key, () => {
@@ -1507,9 +1563,9 @@ function emaPicture() {
   page(`
     <h1>Picture description</h1>
     <p class="lead">Please describe the assigned scene in detail. Try to keep talking toward 60-90 seconds if you can.</p>
-    ${pictureStimulus(pic)}
-    <div class="prompt">${html(pic.prompt)}</div>
-    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 300, 20, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed)}
+    <div data-live-stimulus ${completed ? "" : "hidden"}>${pictureStimulus(pic)}</div>
+    <div class="prompt" data-live-stimulus tabindex="-1" ${completed ? "" : "hidden"}>${html(pic.prompt)}</div>
+    ${recorderMarkup("ema_picture_speech", `${draft.key}-${pic.id}`, 300, 20, "The picture appears after recording begins. Aim for 60-90 seconds if you can; you may continue for up to 5 minutes.", completed, true)}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Continue</button></div>
   `);
   attachRecorder("ema_picture_speech", `${draft.key}-${pic.id}`, () => {
