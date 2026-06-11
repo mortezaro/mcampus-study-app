@@ -241,6 +241,27 @@ function summarizeParticipants(rows) {
     .sort((a, b) => String(b.lastSeenAt || "").localeCompare(String(a.lastSeenAt || "")));
 }
 
+function getParticipantStatus(participantId) {
+  const rows = readEvents().filter(row => row.participantId === participantId);
+  const hasQualificationComplete = rows.some(row => row.type === "qualification_complete");
+  const hasBaselineComplete = rows.some(row => row.type === "baseline_complete");
+  const hasAnyRecording = rows.some(row => row.type === "recording_complete");
+
+  return {
+    participantId,
+    found: rows.length > 0,
+    eventCount: rows.length,
+    hasQualificationComplete,
+    hasBaselineComplete,
+    hasAnyRecording,
+    studyIds: Array.from(new Set(rows.map(row => row.studyId).filter(Boolean))),
+    lastSeenAt: rows.reduce((latest, row) => {
+      if (!row.receivedAt) return latest;
+      return !latest || row.receivedAt > latest ? row.receivedAt : latest;
+    }, "")
+  };
+}
+
 function safeName(value) {
   return String(value || "unknown").replace(/[^a-zA-Z0-9._-]+/g, "_").slice(0, 80);
 }
@@ -336,6 +357,25 @@ async function handleApi(req, res) {
 
   if (req.method === "GET" && url.pathname === "/api/config") {
     sendJson(res, 200, CONFIG);
+    return;
+  }
+
+  if (req.method === "GET" && url.pathname === "/api/participant-status") {
+    const participantId = safeName(url.searchParams.get("participantId"));
+    if (!participantId || participantId === "unknown") {
+      sendJson(res, 200, {
+        participantId,
+        found: false,
+        eventCount: 0,
+        hasQualificationComplete: false,
+        hasBaselineComplete: false,
+        hasAnyRecording: false,
+        studyIds: [],
+        lastSeenAt: ""
+      });
+      return;
+    }
+    sendJson(res, 200, getParticipantStatus(participantId));
     return;
   }
 

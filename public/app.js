@@ -111,6 +111,7 @@ const state = {
   participantId: "",
   studyId: "",
   sessionId: "",
+  repeatBlock: null,
   consent: false,
   eligible: {},
   forms: {},
@@ -1792,7 +1793,7 @@ function qualificationSpeech() {
     <p class="lead">The prompt appears only after recording starts. Begin answering immediately; normal pauses, corrections, and hesitations are welcome.</p>
     <div class="band"><p>Do not use notes, websites, AI tools, or another device. There is no perfect answer.</p></div>
     <div class="prompt" data-live-stimulus tabindex="-1" ${completed ? "" : "hidden"}>${html(prompt)}</div>
-    ${recorderMarkup("qualification_open_speech", "qualification", 120, 30, "Please speak naturally for about 45-90 seconds. Recording stops after 2 minutes.", completed, true)}
+    ${recorderMarkup("qualification_open_speech", "qualification", 150, 30, "Please speak naturally for about 45-120 seconds. Recording stops after 2 minutes 30 seconds.", completed, true)}
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next" ${completed ? "" : "disabled"}>Finish</button></div>
   `);
   attachRecorder("qualification_open_speech", "qualification", () => {
@@ -1824,8 +1825,21 @@ function qualificationComplete() {
   `);
 }
 
+function qualificationRepeatBlocked() {
+  page(`
+    <h1>Qualification already completed</h1>
+    <p class="lead">This Prolific ID already has a completed voice qualification on file, so this repeat attempt has been blocked.</p>
+    <div class="band"><p>If you reached this page by mistake, please return to Prolific. No additional response is needed here.</p></div>
+    <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+  `);
+}
+
 function render() {
   if (STUDY_MODE === "qualification") {
+    if (state.repeatBlock?.hasQualificationComplete) {
+      qualificationRepeatBlocked();
+      return;
+    }
     if (state.step === "qConsent") qualificationConsent();
     else if (state.step === "qProfile") qualificationProfile();
     else if (state.step === "qSpeech") qualificationSpeech();
@@ -1863,6 +1877,9 @@ async function init() {
   try {
     state.config = await api("/api/config");
     restoreLocal();
+    if (STUDY_MODE === "qualification" && state.participantId && !LOCALHOST && !DEMO_MODE) {
+      state.repeatBlock = await api(`/api/participant-status?participantId=${encodeURIComponent(state.participantId)}`).catch(() => null);
+    }
     if (STUDY_MODE === "qualification" && !String(state.step).startsWith("q")) state.step = "qWelcome";
     render();
     logEvent("app_open", params());
