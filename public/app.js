@@ -187,33 +187,6 @@ function emaScheduleSummary() {
   return { days, sessionsPerDay, windows };
 }
 
-function parseWindowTime(value) {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function localWindowTime(value, now) {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(String(value || ""));
-  if (!match) return null;
-  const date = new Date(now);
-  date.setHours(Number(match[1]), Number(match[2]), 0, 0);
-  return date;
-}
-
-function emaAccessStatus() {
-  if (state.sessionContext?.kind !== "ema") return { allowed: true };
-  const now = new Date();
-  const configuredWindow = emaWindowForSlot(state.sessionContext.slot);
-  const start = parseWindowTime(state.sessionContext.windowStart)
-    || localWindowTime(configuredWindow.start, now);
-  const end = parseWindowTime(state.sessionContext.windowEnd)
-    || localWindowTime(configuredWindow.end, now);
-  if (start && now < start) return { allowed: false, reason: "too_early", start, end, now };
-  if (end && now > end) return { allowed: false, reason: "expired", start, end, now };
-  return { allowed: true, start, end, now };
-}
-
 function deriveSessionContext() {
   const queryKind = String(QUERY.get("kind") || QUERY.get("waveKind") || "").trim().toLowerCase();
   const queryDay = parsePositiveInt(QUERY.get("day"));
@@ -528,24 +501,6 @@ function welcome() {
     `);
     return;
   }
-  const access = emaAccessStatus();
-  if (state.sessionContext?.kind === "ema" && !access.allowed && !LOCALHOST && !DEMO_MODE) {
-    const windowText = access.start && access.end
-      ? `${access.start.toLocaleString([], { hour: "2-digit", minute: "2-digit" })} - ${access.end.toLocaleString([], { hour: "2-digit", minute: "2-digit" })}`
-      : "the scheduled window";
-    page(`
-      <h1>${access.reason === "expired" ? "This session window has closed" : "This session is not open yet"}</h1>
-      <p class="lead">Please use the link during its scheduled window.</p>
-      <div class="band">
-        <p><strong>Window:</strong> ${html(windowText)}</p>
-        <p>${access.reason === "expired"
-          ? "This EMA session has expired in your local time zone. Please wait for the next scheduled window or reminder."
-          : "Please come back when the window opens in your local time zone. If you were sent here early, wait until the scheduled time."}</p>
-        <p>If this is not within the correct window, go back to Prolific and click Return there.</p>
-      </div>
-    `);
-    return;
-  }
   if (state.sessionContext?.kind === "ema") {
     const ctx = state.sessionContext;
     const schedule = emaScheduleSummary();
@@ -556,6 +511,7 @@ function welcome() {
         <p><strong>Today's flow:</strong> state/context survey, spontaneous speech, picture description, four cognitive tasks, and final feedback.</p>
         <p><strong>Speech reminders:</strong> respond in your own words, without notes, websites, AI tools, or another device.</p>
         <p><strong>Study plan:</strong> ${schedule.days} days, ${schedule.sessionsPerDay} sessions per day. Windows are ${schedule.windows.map(w => `${html(w.label)} ${html(w.start)}-${html(w.end)}`).join("; ")}.</p>
+        <p>If this is not within the intended ${html(ctx.label || waveLabel(ctx.slot))} window, please return the study in Prolific instead of completing it now.</p>
       </div>
       <div class="field">
         <label for="pid">Participant ID</label>
