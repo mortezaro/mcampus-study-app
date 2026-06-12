@@ -654,6 +654,9 @@ function welcome() {
       <p>${mainEntry
         ? "This visit completes the intake stage. After this, the study stays in the app, where 12 days of EMA sessions are scheduled and tracked automatically."
         : "This onboarding visit is only questionnaires and instructions. After this, you will complete 12 days of EMA, 3 sessions per day, one session per link."}</p>
+      <p>${mainEntry
+        ? "The task flow includes clear instructions, brief practice where applicable, and corrective feedback during the task experience."
+        : "This virtual onboarding also explains how the task flow works, including task instructions, brief practice where applicable, and corrective feedback during the task experience."}</p>
     </div>
     <div class="actions"><button class="button" id="start">Continue</button></div>
   `);
@@ -678,6 +681,8 @@ function consent() {
     <div class="band">
       <p><strong>Participation.</strong> This onboarding visit is brief. After that, you will complete 12 days of EMA, 3 times per day, with one short session each time you open a scheduled link.</p>
       <p><strong>Tasks.</strong> Each session includes short questionnaires, a 60-90 second spoken response, brief cognitive tasks, and a question about interruptions or experience.</p>
+      <p><strong>Virtual onboarding.</strong> Participants review the task instructions up front. The task flow also includes brief practice where applicable and corrective feedback during the task experience.</p>
+      <p><strong>Completion bonuses.</strong> Participants can qualify for bonus tiers by completing at least 80%, 90%, or 100% of the scheduled sessions, according to the study payment plan.</p>
       <p><strong>Risks.</strong> Possible risks include mild fatigue, concentration effort, frustration, and privacy risks because voice recordings can be re-identifiable. Please do not speak names, addresses, passwords, or other private details.</p>
       <p><strong>Data.</strong> Research data are stored with a pseudonymous ID. Speech is not fully anonymous. Data are used for research, not diagnosis, commercial profiling, or automated decisions.</p>
       <p><strong>Withdrawal.</strong> Participation is voluntary. You may stop anytime and may request deletion up to 30 days after your final session.</p>
@@ -763,6 +768,8 @@ function onboardingCommitment() {
     <div class="band">
       <p><strong>Detected device:</strong> ${html(device.viewport)}, ${html(device.platform || "unknown platform")}</p>
       <p>You will receive one link per session. Complete only that session each time, then return to Prolific.</p>
+      <p><strong>Virtual onboarding covers:</strong> task instructions, how practice trials work when they are available, and how corrective feedback appears during the task flow.</p>
+      <p><strong>Completion bonuses:</strong> bonus tiers are tied to finishing at least 80%, 90%, or 100% of the scheduled sessions.</p>
     </div>
     <label class="choice">
       <input type="checkbox" data-field="onboarding_phone_ok" ${state.forms.onboarding_phone_ok ? "checked" : ""}>
