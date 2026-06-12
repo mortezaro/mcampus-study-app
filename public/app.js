@@ -517,28 +517,6 @@ function welcome() {
     `);
     return;
   }
-  if (state.sessionContext?.kind === "ema" && !LOCALHOST && !DEMO_MODE && !state.participantStatus?.hasOnboardingComplete) {
-    page(`
-      <h1>Onboarding required first</h1>
-      <p class="lead">This link is for a daily EMA session, but we do not yet see a completed onboarding session for this Prolific ID.</p>
-      <div class="band">
-        <p>Please complete the onboarding wave first, then return to the EMA links. If you believe this is an error, contact the research team.</p>
-      </div>
-      <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
-    `);
-    return;
-  }
-  if (state.sessionContext?.kind === "ema" && state.participantStatus?.completedEmaSessions?.includes(state.sessionContext.key) && !LOCALHOST && !DEMO_MODE) {
-    page(`
-      <h1>Session already completed</h1>
-      <p class="lead">This EMA session already has a saved completion for this Prolific ID.</p>
-      <div class="band">
-        <p>Please return to Prolific. Do not repeat this same session.</p>
-      </div>
-      <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
-    `);
-    return;
-  }
   const access = emaAccessStatus();
   if (state.sessionContext?.kind === "ema" && !access.allowed && !LOCALHOST && !DEMO_MODE) {
     const windowText = access.start && access.end
@@ -555,10 +533,6 @@ function welcome() {
         <p>If this is not within the correct window, go back to Prolific and click Return there.</p>
       </div>
     `);
-    return;
-  }
-  if (state.sessionContext?.kind === "ema" && state.ema[state.sessionContext.key]?.done) {
-    go("emaComplete");
     return;
   }
   if (state.sessionContext?.kind === "ema") {
@@ -613,17 +587,6 @@ function welcome() {
       }
       go("emaSurvey");
     };
-    return;
-  }
-  if (!LOCALHOST && !DEMO_MODE && state.participantStatus?.hasOnboardingComplete) {
-    page(`
-      <h1>Onboarding already completed</h1>
-      <p class="lead">We already have a completed onboarding session for this Prolific ID.</p>
-      <div class="band">
-        <p>Please return to Prolific. Use the scheduled EMA links for the daily sessions.</p>
-      </div>
-      <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
-    `);
     return;
   }
   const mainEntry = state.sessionContext?.kind === "main";
