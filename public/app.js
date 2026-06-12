@@ -155,7 +155,7 @@ function params() {
 function localStateKey() {
   const suffix = STUDY_MODE === "qualification"
     ? ":qualification"
-    : `:${state.studyId || state.sessionContext?.key || state.sessionContext?.kind || "main"}`;
+    : `:${state.sessionContext?.key || state.studyId || state.sessionContext?.kind || "main"}`;
   return `mcampus:${state.participantId}:state${suffix}`;
 }
 
@@ -228,7 +228,7 @@ function deriveSessionContext() {
   if (queryKind === "ema" && queryDay && querySlot) {
     const label = queryLabel || waveLabel(querySlot);
     return {
-      key: state.studyId || `d${queryDay}s${querySlot}`,
+      key: `d${queryDay}s${querySlot}`,
       kind: "ema",
       day: queryDay,
       slot: querySlot,
@@ -252,7 +252,7 @@ function deriveSessionContext() {
     const slot = parsePositiveInt(mapped.slot);
     const day = parsePositiveInt(mapped.day);
     return {
-      key: state.studyId || `d${day}s${slot}`,
+      key: `d${day}s${slot}`,
       kind: "ema",
       day,
       slot,
