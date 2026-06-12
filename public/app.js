@@ -1894,7 +1894,6 @@ function emaSurvey() {
     <p class="lead">First, answer based on how you feel right now.</p>
     ${scaleRows([["mood", "Mood"], ["stress", "Stress"], ["fatigue", "Fatigue"], ["focus", "Difficulty focusing"], ["noise", "Background noise"]], `ema_${draft.key}`, "Low", "High")}
     <div class="field"><label>Where are you?</label><select data-field="ema_${draft.key}_location">${selectOptions(["Home", "Work or school", "Public indoor place", "Outdoors", "In transit", "Other"], state.forms[`ema_${draft.key}_location`])}</select></div>
-    <div class="field"><label>Current context</label><textarea id="emaContext" placeholder="A few words about where you are or what you are doing"></textarea></div>
     <div class="actions"><button class="button secondary" id="cancel">Back</button><button class="button" id="next">Continue</button></div>
   `);
   bindFields();
@@ -1909,8 +1908,7 @@ function emaSurvey() {
       fatigue: state.forms[`ema_${draft.key}_fatigue`],
       focus: state.forms[`ema_${draft.key}_focus`],
       noise: state.forms[`ema_${draft.key}_noise`],
-      location: state.forms[`ema_${draft.key}_location`],
-      context: document.querySelector("#emaContext").value
+      location: state.forms[`ema_${draft.key}_location`]
     };
     saveLocal();
     await logEvent("ema_survey_complete", { session: draft.key, day: draft.day, slot: draft.slot, sessionIndex: draft.index + 1, survey: draft.survey });
@@ -1923,7 +1921,7 @@ function emaSpeech() {
   const completed = Boolean(draft.recordings.openSpeech);
   page(`
     <h1>Spontaneous speech</h1>
-    <p class="lead">The prompt appears only after recording begins. Respond immediately in your own words; natural pauses and hesitations are expected.</p>
+    <p class="lead">The prompt appears only after recording begins. Respond immediately in your own words.</p>
     <div class="band"><p>Do not read a prepared answer or use notes, websites, AI tools, or another device.</p></div>
     <div class="prompt" data-live-stimulus tabindex="-1" ${completed ? "" : "hidden"}>${html(groundedSpeechPrompt(draft.spontaneousPrompt))}</div>
     ${recorderMarkup("ema_open_speech", draft.key, 300, 40, "Aim for 60-90 seconds if you can. You may continue for up to 5 minutes.", completed, true)}
@@ -1972,7 +1970,7 @@ function emaFinal() {
       ["privacy", "Concern about audio/privacy"],
       ["distraction", "Distraction during the session"]
     ], `ema_final_${draft.key}`, "Low", "High")}
-    <div class="field"><label>Was this check-in interrupted?</label><select data-field="ema_final_${draft.key}_interrupted">${selectOptions(["No", "Yes, briefly", "Yes, substantially"], state.forms[`ema_final_${draft.key}_interrupted`])}</select></div>
+    <div class="field"><label>Were you interrupted in this session?</label><select data-field="ema_final_${draft.key}_interrupted">${selectOptions(["No", "Yes, briefly", "Yes, substantially"], state.forms[`ema_final_${draft.key}_interrupted`])}</select></div>
     <div class="field"><label>Approximate interruption duration</label><select data-field="ema_final_${draft.key}_duration">${selectOptions(["None", "Less than 1 minute", "1-5 minutes", "More than 5 minutes"], state.forms[`ema_final_${draft.key}_duration`])}</select></div>
     <div class="field"><label>Anything unusual about this session?</label><textarea data-field="ema_final_${draft.key}_feedback">${val(`ema_final_${draft.key}_feedback`)}</textarea></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="save">Save check-in</button></div>
