@@ -583,7 +583,6 @@ function welcome() {
         <p><strong>Today's flow:</strong> state/context survey, spontaneous speech, picture description, four cognitive tasks, and final feedback.</p>
         <p><strong>Speech reminders:</strong> respond in your own words, without notes, websites, AI tools, or another device. Natural pauses are expected.</p>
         <p><strong>Study plan:</strong> ${schedule.days} days, ${schedule.sessionsPerDay} sessions per day. Windows are ${schedule.windows.map(w => `${html(w.label)} ${html(w.start)}-${html(w.end)}`).join("; ")}.</p>
-        <p><strong>Reminder contact:</strong> ${html(state.forms.contact_preference || "not set")} ${state.forms.email ? `email ${html(state.forms.email)}` : ""}${state.forms.phone ? `${state.forms.email ? " / " : ""}phone ${html(state.forms.phone)}` : ""}</p>
       </div>
       <div class="field">
         <label for="pid">Participant ID</label>
@@ -644,7 +643,7 @@ function welcome() {
     <h1>${mainEntry ? "Start M-CAMPUS main longitudinal study" : "Start M-CAMPUS onboarding"}</h1>
     <p class="lead">${mainEntry
       ? "This is your one-time entry into the full longitudinal study. After this visit, all EMA sessions happen in the app on a schedule."
-      : "This short setup visit confirms your schedule, phone setup, and study expectations before the 12-day EMA phase begins."}</p>
+      : "This short setup visit confirms the parts of the study we have not already captured in screening before the 12-day EMA phase begins."}</p>
     <div class="field">
       <label for="pid">Participant ID</label>
       <input id="pid" class="input" autocomplete="off" value="${html(state.participantId)}" placeholder="Loaded from Prolific when available">
@@ -709,11 +708,8 @@ function onboardingProfile() {
   }
   page(`
     <h1>Scheduling and routines</h1>
-    <p class="lead">A few short items so we can schedule and interpret the EMA sessions correctly.</p>
+    <p class="lead">A few short items we have not already captured in screening.</p>
     <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
-    <div class="field"><label>Email address</label><input class="input" inputmode="email" autocomplete="email" data-field="email" value="${val("email")}" placeholder="Optional but recommended"></div>
-    <div class="field"><label>Phone number</label><input class="input" inputmode="tel" autocomplete="tel" data-field="phone" value="${val("phone")}" placeholder="Optional but recommended"></div>
-    <div class="field"><label>Preferred contact method <span class="required">*</span></label><select data-field="contact_preference" required>${selectOptions(["Email", "Phone", "Either"], state.forms.contact_preference)}</select></div>
     <div class="field"><label>Usual bedtime <span class="required">*</span></label><select data-field="usual_bedtime" required>${selectOptions(BEDTIME_OPTIONS, state.forms.usual_bedtime)}</select></div>
     <div class="field"><label>Usual wake time <span class="required">*</span></label><select data-field="usual_waketime" required>${selectOptions(WAKETIME_OPTIONS, state.forms.usual_waketime)}</select></div>
     <div class="field"><label>Are you likely to use headphones during most sessions? <span class="required">*</span></label><select data-field="headphones" required>${selectOptions(["No", "Yes, wired", "Yes, wireless", "It depends"], state.forms.headphones)}</select></div>
@@ -724,25 +720,12 @@ function onboardingProfile() {
   document.querySelector("#next").onclick = async () => {
     if (!requireFields([
       { name: "timezone", label: "Time zone" },
-      { name: "contact_preference", label: "Preferred contact method" },
       { name: "usual_bedtime", label: "Usual bedtime" },
       { name: "usual_waketime", label: "Usual wake time" },
       { name: "headphones", label: "Headphones" }
     ])) return;
-    const hasEmail = String(state.forms.email || "").trim();
-    const hasPhone = String(state.forms.phone || "").trim();
-    if (!hasEmail && !hasPhone) {
-      showFormError("Please provide an email address or phone number so we can send EMA reminders.", [
-        "email",
-        "phone"
-      ]);
-      return;
-    }
     await logEvent("onboarding_profile", {
       timezone: state.forms.timezone,
-      email: state.forms.email || null,
-      phone: state.forms.phone || null,
-      contactPreference: state.forms.contact_preference,
       usualBedtime: state.forms.usual_bedtime,
       usualWaketime: state.forms.usual_waketime,
       headphones: state.forms.headphones
