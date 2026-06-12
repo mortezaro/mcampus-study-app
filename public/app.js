@@ -707,6 +707,7 @@ function consent() {
 }
 
 function onboardingProfile() {
+  const onboardingSleepScales = [["sleep_quality", "Sleep quality last night"], ["chronotype", "Morningness vs eveningness"], ["caffeine", "Caffeine since waking"]];
   if (!state.forms.timezone) {
     const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     state.forms.timezone = TIME_ZONE_OPTIONS.includes(detectedTimeZone) ? detectedTimeZone : "";
@@ -720,6 +721,8 @@ function onboardingProfile() {
     <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
     <div class="field"><label>Usual bedtime <span class="required">*</span></label><select data-field="usual_bedtime" required>${selectOptions(BEDTIME_OPTIONS, state.forms.usual_bedtime)}</select></div>
     <div class="field"><label>Usual wake time <span class="required">*</span></label><select data-field="usual_waketime" required>${selectOptions(WAKETIME_OPTIONS, state.forms.usual_waketime)}</select></div>
+    <div class="field"><label>Hours slept last night <span class="required">*</span></label><input class="input" inputmode="decimal" data-field="sleep_hours" value="${val("sleep_hours")}" required></div>
+    ${scaleRows(onboardingSleepScales, "sleep", "Low", "High")}
     <div class="field"><label>Are you likely to use headphones during most sessions? <span class="required">*</span></label><select data-field="headphones" required>${selectOptions(["No", "Yes, wired", "Yes, wireless", "It depends"], state.forms.headphones)}</select></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
   `);
@@ -733,9 +736,12 @@ function onboardingProfile() {
       { name: "timezone", label: "Time zone" },
       { name: "usual_bedtime", label: "Usual bedtime" },
       { name: "usual_waketime", label: "Usual wake time" },
+      { name: "sleep_hours", label: "Hours slept last night" },
+      ...scaleFieldList(onboardingSleepScales, "sleep"),
       { name: "headphones", label: "Headphones" }
     ])) return;
     if (!requireNumericRange("age", "Age", 18, 70)) return;
+    if (!requireNumericRange("sleep_hours", "Hours slept last night", 0, 24)) return;
     await logEvent("onboarding_profile", {
       age: state.forms.age,
       gender: state.forms.gender,
@@ -743,6 +749,10 @@ function onboardingProfile() {
       timezone: state.forms.timezone,
       usualBedtime: state.forms.usual_bedtime,
       usualWaketime: state.forms.usual_waketime,
+      sleepHours: state.forms.sleep_hours,
+      sleepQuality: state.forms.sleep_sleep_quality,
+      chronotype: state.forms.sleep_chronotype,
+      caffeine: state.forms.sleep_caffeine,
       headphones: state.forms.headphones
     });
     go("onboardingCommitment");
