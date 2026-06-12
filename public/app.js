@@ -825,8 +825,8 @@ function onboardingComplete() {
     <div class="band">
       <p><strong>Next:</strong> ${mainEntry
         ? "Your EMA sessions will be handled through the study app and the scheduled Prolific waves."
-        : "use the scheduled Prolific links for the daily EMA sessions. Each future link is for one session only."}</p>
-      <p>${mainEntry ? "Complete each session only during its assigned Prolific wave/window." : "When an EMA link opens, complete that single check-in and then return to Prolific."}</p>
+        : "starting Saturday morning, you will be invited through Prolific to complete the EMA waves. Each future link is for one session only."}</p>
+      <p>${mainEntry ? "Complete each session only during its assigned Prolific wave/window." : "When a Saturday-or-later EMA link opens, complete that single check-in and then return to Prolific."}</p>
     </div>
     <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
   `);
