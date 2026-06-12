@@ -193,11 +193,22 @@ function parseWindowTime(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function localWindowTime(value, now) {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(String(value || ""));
+  if (!match) return null;
+  const date = new Date(now);
+  date.setHours(Number(match[1]), Number(match[2]), 0, 0);
+  return date;
+}
+
 function emaAccessStatus() {
   if (state.sessionContext?.kind !== "ema") return { allowed: true };
   const now = new Date();
-  const start = parseWindowTime(state.sessionContext.windowStart);
-  const end = parseWindowTime(state.sessionContext.windowEnd);
+  const configuredWindow = emaWindowForSlot(state.sessionContext.slot);
+  const start = parseWindowTime(state.sessionContext.windowStart)
+    || localWindowTime(configuredWindow.start, now);
+  const end = parseWindowTime(state.sessionContext.windowEnd)
+    || localWindowTime(configuredWindow.end, now);
   if (start && now < start) return { allowed: false, reason: "too_early", start, end, now };
   if (end && now > end) return { allowed: false, reason: "expired", start, end, now };
   return { allowed: true, start, end, now };
@@ -543,7 +554,7 @@ function welcome() {
       <p class="lead">This link is for one EMA check-in only. Complete this session once, then return to Prolific.</p>
       <div class="band">
         <p><strong>Today's flow:</strong> state/context survey, spontaneous speech, picture description, four cognitive tasks, and final feedback.</p>
-        <p><strong>Speech reminders:</strong> respond in your own words, without notes, websites, AI tools, or another device. Natural pauses are expected.</p>
+        <p><strong>Speech reminders:</strong> respond in your own words, without notes, websites, AI tools, or another device.</p>
         <p><strong>Study plan:</strong> ${schedule.days} days, ${schedule.sessionsPerDay} sessions per day. Windows are ${schedule.windows.map(w => `${html(w.label)} ${html(w.start)}-${html(w.end)}`).join("; ")}.</p>
       </div>
       <div class="field">
