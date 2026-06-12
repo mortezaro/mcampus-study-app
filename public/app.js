@@ -748,8 +748,8 @@ function onboardingCommitment() {
   };
   state.forms.device_metadata = device;
   page(`
-    <h1>Commitment and phone setup</h1>
-    <p class="lead">Please confirm the rules for the EMA phase.</p>
+    <h1>Study instructions</h1>
+    <p class="lead">Please read and confirm the rules for the EMA phase.</p>
     <div class="band">
       <p><strong>Detected device:</strong> ${html(device.viewport)}, ${html(device.platform || "unknown platform")}</p>
       <p>You will receive one link per session. Complete only that session each time, then return to Prolific.</p>
