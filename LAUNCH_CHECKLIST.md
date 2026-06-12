@@ -14,6 +14,9 @@ Use this before inviting real participants.
 - Confirm `tmb_official_task_result` events include `outcomes`, `results`, and `trialCount`.
 - Complete one EMA session without `demo=1`.
 - Confirm EMA includes survey, spontaneous speech, picture description, Choice RT, Digit Symbol, GradCPT, MOT, and final feedback.
+- Confirm `ema_window_opened` and `ema_complete` events appear for at least one pilot session.
+- Confirm an expired EMA link is blocked outside its window.
+- Confirm onboarding collects an email or phone number for reminders.
 - Confirm EMA GradCPT URL does not include `picsInput_300imgs_32nogo.txt`.
 
 ## Study Configuration

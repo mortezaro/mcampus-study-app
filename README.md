@@ -5,6 +5,7 @@ Phone-first baseline and EMA app for the M-CAMPUS Mobile Cognition Study.
 ## What It Does
 
 - Captures Prolific IDs from `PROLIFIC_PID`, `pid`, or manual entry.
+- Captures email or phone contact details for reminder delivery during onboarding.
 - Runs consent, eligibility, demographics, sleep, PANAS-style state/context questionnaires, device/mic check, randomized open speech, randomized picture description, cognitive tasks, final interruption/feedback questions, and EMA check-ins.
 - Includes 24 Appendix A narrative prompts and 12 picture-description scene slots from the protocol.
 - Uses the standard open-source TestMyBrain task pages for Choice RT, Digit Symbol Matching, GradCPT, and MOT from `manybrainsproject/TestMyBrainCodeRepo`.
@@ -13,6 +14,7 @@ Phone-first baseline and EMA app for the M-CAMPUS Mobile Cognition Study.
 - Uploads audio to `data/uploads`.
 - Captures official TMB outcomes and trial rows back into `data/events.jsonl`.
 - Logs all events to `data/events.jsonl`.
+- Records EMA plan and reminder events so an external scheduler can target the right day and slot.
 - Includes a simple researcher view at the EMA dashboard.
 
 ## Run Locally
@@ -54,8 +56,31 @@ Set these environment variables on the hosting service:
 - `ADMIN_TOKEN=<long random secret>`
 - `MAX_UPLOAD_MB=25`
 - `DATA_DIR=/data` or the path to the service's persistent disk/volume
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` for SMS reminders
+- `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL` for email reminders
 
 In production, `/api/admin/events` is disabled unless `ADMIN_TOKEN` is set.
+
+## Suggested Prolific Setup
+
+If you want to stay within Prolific's wave limit, use two Prolific projects with the same approved cohort:
+
+1. Project A: onboarding plus the first EMA block.
+2. Project B: the remaining EMA block.
+
+In both projects, the app remains the source of truth for session windows and completion logging. Set `PROLIFIC_WAVE_MAP_JSON` so the onboarding study ID maps to `kind=onboarding`, and each EMA study ID maps to `kind=ema` with its day, slot, and label.
+
+Example:
+
+```json
+{
+  "project_a_onboarding_id": { "kind": "onboarding", "title": "Onboarding" },
+  "project_a_main_id": { "kind": "main", "title": "Main longitudinal study" },
+  "project_b_day1_morning": { "kind": "ema", "day": 1, "slot": 1, "label": "Morning" }
+}
+```
+
+If a participant opens an EMA link outside the window, the app blocks entry and tells them to wait for the next scheduled window. The Prolific submission should then be handled according to your study policy.
 
 ## Data Access
 
@@ -66,6 +91,9 @@ With `ADMIN_TOKEN` set, use these protected endpoints:
 - `/api/admin/events?token=ADMIN_TOKEN` exports all logged study events, including questionnaires, cognitive task order/position, TMB outcomes/trial rows, recording metadata, and upload events.
 - `/api/admin/uploads?token=ADMIN_TOKEN` lists uploaded audio files from the persistent disk.
 - `/api/admin/uploads/FILENAME?token=ADMIN_TOKEN` downloads a single uploaded audio file.
+- `/api/admin/reminders?token=ADMIN_TOKEN` accepts reminder logs from an external scheduler or messaging service.
+- The reminder endpoint also returns a fully formed EMA target URL for the matching day/slot window.
+- When Twilio or SendGrid credentials are present, the reminder endpoint sends the message immediately and logs delivery status.
 
 ## Deployment Shape
 

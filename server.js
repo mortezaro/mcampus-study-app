@@ -23,6 +23,19 @@ const EVENTS_FILE = path.join(DATA_DIR, "events.jsonl");
 
 fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
+function parseJsonEnv(name, fallback) {
+  const raw = String(process.env[name] || "").trim();
+  if (!raw) return fallback;
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.warn(`Invalid ${name}: ${err.message}`);
+    return fallback;
+  }
+}
+
+const WAVE_MAP = parseJsonEnv("PROLIFIC_WAVE_MAP_JSON", {});
+
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -45,6 +58,17 @@ const CONFIG = {
   studyUrl: APP_BASE_URL,
   maxUploadMb: MAX_UPLOAD_MB,
   prolificCompletionUrl: process.env.PROLIFIC_COMPLETION_URL || "https://app.prolific.com/submissions/complete?cc=CRHUWZ7L",
+  onboardingStudyId: process.env.ONBOARDING_STUDY_ID || "",
+  waveMap: WAVE_MAP,
+  emaSchedule: {
+    days: 12,
+    sessionsPerDay: 3,
+    windows: [
+      { label: "Morning", start: "08:00", end: "12:00" },
+      { label: "Afternoon", start: "13:00", end: "17:00" },
+      { label: "Evening", start: "18:00", end: "22:00" }
+    ]
+  },
   baselineSpeechPrompts: [
     "Please describe a recent routine activity from beginning to end. Speak continuously for about 60 to 90 seconds.",
     "Please describe what happened during the morning or afternoon of a recent day. Speak continuously for about 60 to 90 seconds.",
@@ -77,8 +101,123 @@ const CONFIG = {
     sessionsPerDay: 3,
     windows: ["Morning", "Afternoon", "Evening"],
     speechPrompt: "Please say one or two sentences about what you are doing or thinking right now."
+  },
+  studyFlow: {
+    onboardingKind: "onboarding",
+    emaKind: "ema",
+    days: 12,
+    sessionsPerDay: 3,
+    windows: ["Morning", "Afternoon", "Evening"]
   }
 };
+
+const TWILIO_ACCOUNT_SID = String(process.env.TWILIO_ACCOUNT_SID || "").trim();
+const TWILIO_AUTH_TOKEN = String(process.env.TWILIO_AUTH_TOKEN || "").trim();
+const TWILIO_FROM_NUMBER = String(process.env.TWILIO_FROM_NUMBER || "").trim();
+const SENDGRID_API_KEY = String(process.env.SENDGRID_API_KEY || "").trim();
+const SENDGRID_FROM_EMAIL = String(process.env.SENDGRID_FROM_EMAIL || "").trim();
+
+function buildEmaPlan(participantId = "unknown") {
+  const days = CONFIG.emaSchedule.days;
+  const sessionsPerDay = CONFIG.emaSchedule.sessionsPerDay;
+  const windows = CONFIG.emaSchedule.windows;
+  const rows = [];
+  for (let day = 1; day <= days; day += 1) {
+    for (let slot = 1; slot <= sessionsPerDay; slot += 1) {
+      const window = windows[slot - 1] || windows[0];
+      const key = `d${day}s${slot}`;
+      rows.push({
+        participantId,
+        key,
+        day,
+        slot,
+        label: window.label,
+        windowStart: window.start,
+        windowEnd: window.end,
+        title: `Day ${day} ${window.label}`
+      });
+    }
+  }
+  return rows;
+}
+
+function reminderWindowLabel(day, slot, label) {
+  return `Day ${day} ${label || `Session ${slot}`}`;
+}
+
+function reminderText(payload, targetUrl) {
+  const title = reminderWindowLabel(payload.day, payload.slot, payload.label);
+  const windowText = payload.windowStart && payload.windowEnd
+    ? `Your window is ${payload.windowStart} to ${payload.windowEnd}.`
+    : "Your window is now open.";
+  return `M-CAMPUS reminder: ${title}. ${windowText} Open this link to complete the session: ${targetUrl}`;
+}
+
+async function sendTwilioSms(to, body) {
+  if (!TWILIO_ACCOUNT_SID || !TWILIO_AUTH_TOKEN || !TWILIO_FROM_NUMBER) {
+    throw new Error("Twilio SMS is not configured.");
+  }
+  const url = `https://api.twilio.com/2010-04-01/Accounts/${encodeURIComponent(TWILIO_ACCOUNT_SID)}/Messages.json`;
+  const form = new URLSearchParams({
+    From: TWILIO_FROM_NUMBER,
+    To: to,
+    Body: body
+  });
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      authorization: `Basic ${Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString("base64")}`,
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    body: form
+  });
+  const text = await res.text();
+  if (!res.ok) throw new Error(`Twilio SMS failed: ${text}`);
+  return JSON.parse(text);
+}
+
+async function sendSendGridEmail(to, subject, text, htmlBody = "") {
+  if (!SENDGRID_API_KEY || !SENDGRID_FROM_EMAIL) {
+    throw new Error("SendGrid email is not configured.");
+  }
+  const res = await fetch("https://api.sendgrid.com/v3/mail/send", {
+    method: "POST",
+    headers: {
+      authorization: `Bearer ${SENDGRID_API_KEY}`,
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      personalizations: [{ to: [{ email: to }] }],
+      from: { email: SENDGRID_FROM_EMAIL, name: "M-CAMPUS Study" },
+      subject,
+      content: [
+        { type: "text/plain", value: text },
+        { type: "text/html", value: htmlBody || `<p>${text.replace(/\n/g, "<br>")}</p>` }
+      ]
+    })
+  });
+  if (!res.ok) throw new Error(`SendGrid email failed: ${await res.text()}`);
+  return true;
+}
+
+async function dispatchReminder({ participantId, contact, payload, targetUrl }) {
+  const body = reminderText(payload, targetUrl);
+  const subject = `M-CAMPUS ${reminderWindowLabel(payload.day, payload.slot, payload.label)}`;
+  const channel = String(payload.channel || contact?.contactPreference || "").toLowerCase();
+  if ((channel === "sms" || channel === "phone" || channel === "text") && contact?.phone) {
+    return { channel: "sms", result: await sendTwilioSms(contact.phone, body) };
+  }
+  if (contact?.email) {
+    return { channel: "email", result: await sendSendGridEmail(contact.email, subject, body) };
+  }
+  if (contact?.phone && TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_FROM_NUMBER) {
+    return { channel: "sms", result: await sendTwilioSms(contact.phone, body) };
+  }
+  if (contact?.email && SENDGRID_API_KEY && SENDGRID_FROM_EMAIL) {
+    return { channel: "email", result: await sendSendGridEmail(contact.email, subject, body) };
+  }
+  throw new Error(`No usable delivery channel configured for ${participantId}.`);
+}
 
 function sendJson(res, status, body) {
   const payload = JSON.stringify(body);
@@ -148,10 +287,15 @@ function summarizeParticipants(rows) {
         lastSeenAt: row.receivedAt,
         baselineComplete: false,
         baselineCompletedAt: null,
+        onboardingComplete: false,
+        onboardingCompletedAt: null,
         emaCompleted: 0,
         emaSessions: {},
+        emaPlan: [],
+        contact: null,
         uploads: [],
         recordingEvents: [],
+        reminderEvents: [],
         tmbEvents: [],
         device: null,
         eventCount: 0
@@ -172,6 +316,21 @@ function summarizeParticipants(rows) {
       summary.baselineForms = row.payload?.forms || null;
     }
 
+    if (row.type === "onboarding_complete") {
+      summary.onboardingComplete = true;
+      summary.onboardingCompletedAt = row.receivedAt;
+      summary.onboardingForms = row.payload?.forms || null;
+    }
+
+    if (row.type === "onboarding_profile") {
+      summary.contact = {
+        email: row.payload?.email || null,
+        phone: row.payload?.phone || null,
+        contactPreference: row.payload?.contactPreference || null,
+        timezone: row.payload?.timezone || null
+      };
+    }
+
     if (row.type === "device_check") {
       summary.device = row.payload?.device_metadata || row.payload || summary.device;
     }
@@ -187,6 +346,22 @@ function summarizeParticipants(rows) {
         pictureSchedulePosition: row.payload?.pictureSchedulePosition || null
       };
       summary.emaCompleted = Object.keys(summary.emaSessions).length;
+    }
+
+    if (row.type === "ema_plan") {
+      summary.emaPlan = Array.isArray(row.payload?.plan) ? row.payload.plan : [];
+    }
+
+    if (row.type === "reminder_sent" || row.type === "reminder_opened") {
+      summary.reminderEvents.push({
+        receivedAt: row.receivedAt,
+        type: row.type,
+        day: row.payload?.day || null,
+        slot: row.payload?.slot || null,
+        label: row.payload?.label || null,
+        channel: row.payload?.channel || null,
+        scheduledFor: row.payload?.scheduledFor || null
+      });
     }
 
     if (row.type === "audio_upload") {
@@ -245,7 +420,15 @@ function getParticipantStatus(participantId) {
   const rows = readEvents().filter(row => row.participantId === participantId);
   const hasQualificationComplete = rows.some(row => row.type === "qualification_complete");
   const hasBaselineComplete = rows.some(row => row.type === "baseline_complete");
+  const hasOnboardingComplete = rows.some(row => row.type === "onboarding_complete" || row.type === "baseline_complete");
   const hasAnyRecording = rows.some(row => row.type === "recording_complete");
+  const completedEmaSessions = rows
+    .filter(row => row.type === "ema_complete")
+    .map(row => row.payload?.session || row.payload?.wave || "")
+    .filter(Boolean);
+  const plannedEmaSessions = buildEmaPlan(participantId);
+  const completedSet = new Set(completedEmaSessions);
+  const remainingEmaSessions = plannedEmaSessions.filter(row => !completedSet.has(row.key));
 
   return {
     participantId,
@@ -253,7 +436,21 @@ function getParticipantStatus(participantId) {
     eventCount: rows.length,
     hasQualificationComplete,
     hasBaselineComplete,
+    hasOnboardingComplete,
     hasAnyRecording,
+    completedEmaSessions,
+    plannedEmaSessions: plannedEmaSessions.length,
+    remainingEmaSessions: remainingEmaSessions.length,
+    emaPlan: plannedEmaSessions,
+    contact: rows.reduce((latest, row) => {
+      if (row.type !== "onboarding_profile") return latest;
+      return {
+        email: row.payload?.email || null,
+        phone: row.payload?.phone || null,
+        contactPreference: row.payload?.contactPreference || null,
+        timezone: row.payload?.timezone || null
+      };
+    }, null),
     studyIds: Array.from(new Set(rows.map(row => row.studyId).filter(Boolean))),
     lastSeenAt: rows.reduce((latest, row) => {
       if (!row.receivedAt) return latest;
@@ -369,7 +566,9 @@ async function handleApi(req, res) {
         eventCount: 0,
         hasQualificationComplete: false,
         hasBaselineComplete: false,
+        hasOnboardingComplete: false,
         hasAnyRecording: false,
+        completedEmaSessions: [],
         studyIds: [],
         lastSeenAt: ""
       });
@@ -422,6 +621,86 @@ async function handleApi(req, res) {
   if (req.method === "GET" && url.pathname === "/api/admin/participants") {
     if (!requireAdmin(req, res, url)) return;
     sendJson(res, 200, { participants: summarizeParticipants(readEvents()) });
+    return;
+  }
+
+  if (req.method === "POST" && url.pathname === "/api/admin/reminders") {
+    if (!requireAdmin(req, res, url)) return;
+    const body = await readBody(req, 1024 * 1024);
+    const payload = JSON.parse(body.toString("utf8") || "{}");
+    if (!payload.participantId) {
+      sendJson(res, 400, { error: "participantId is required" });
+      return;
+    }
+    const participantId = safeName(payload.participantId);
+    const day = Number(payload.day || 0);
+    const slot = Number(payload.slot || 0);
+    const label = String(payload.label || "").trim();
+    const query = new URLSearchParams({
+      PROLIFIC_PID: participantId,
+      STUDY_ID: safeName(payload.studyId || ""),
+      SESSION_ID: safeName(payload.sessionId || ""),
+      kind: payload.kind || "ema"
+    });
+    if (day > 0) query.set("day", String(day));
+    if (slot > 0) query.set("slot", String(slot));
+    if (label) query.set("label", label);
+    if (payload.windowStart) query.set("windowStart", String(payload.windowStart));
+    if (payload.windowEnd) query.set("windowEnd", String(payload.windowEnd));
+    if (payload.reminderId) query.set("reminderId", String(payload.reminderId));
+    const targetUrl = `${APP_BASE_URL || CONFIG.studyUrl || ""}/?${query.toString()}`;
+    const participantRows = readEvents().filter(row => row.participantId === participantId);
+    const latestContact = participantRows.reverse().find(row => row.type === "onboarding_profile")?.payload || null;
+    const contact = {
+      email: latestContact?.email || null,
+      phone: latestContact?.phone || null,
+      contactPreference: latestContact?.contactPreference || null
+    };
+    const row = appendEvent({
+      type: "reminder_sent",
+      participantId,
+      studyId: safeName(payload.studyId || ""),
+      sessionId: safeName(payload.sessionId || ""),
+      payload: {
+        day: day || null,
+        slot: slot || null,
+        label: label || null,
+        channel: payload.channel || "app",
+        scheduledFor: payload.scheduledFor || null,
+        note: payload.note || null,
+        targetUrl
+      }
+    });
+    let delivery = null;
+    let deliveryError = null;
+    try {
+      delivery = await dispatchReminder({ participantId, contact, payload, targetUrl });
+      appendEvent({
+        type: "reminder_delivered",
+        participantId,
+        studyId: safeName(payload.studyId || ""),
+        sessionId: safeName(payload.sessionId || ""),
+        payload: {
+          reminderId: payload.reminderId || null,
+          channel: delivery.channel,
+          targetUrl
+        }
+      });
+    } catch (err) {
+      deliveryError = String(err?.message || err);
+      appendEvent({
+        type: "reminder_failed",
+        participantId,
+        studyId: safeName(payload.studyId || ""),
+        sessionId: safeName(payload.sessionId || ""),
+        payload: {
+          reminderId: payload.reminderId || null,
+          error: deliveryError,
+          targetUrl
+        }
+      });
+    }
+    sendJson(res, 200, { ok: true, event: row, targetUrl, delivery, deliveryError });
     return;
   }
 

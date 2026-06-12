@@ -52,17 +52,6 @@ const PICTURES = [
   src
 }));
 
-const COUNTRY_OPTIONS = [
-  "United States",
-  "Canada",
-  "United Kingdom",
-  "Ireland",
-  "Australia",
-  "New Zealand",
-  "Other English-speaking country",
-  "Other country"
-];
-
 const TIME_ZONE_OPTIONS = [
   "America/New_York",
   "America/Chicago",
@@ -111,6 +100,8 @@ const state = {
   participantId: "",
   studyId: "",
   sessionId: "",
+  sessionContext: null,
+  participantStatus: null,
   repeatBlock: null,
   consent: false,
   eligible: {},
@@ -128,11 +119,8 @@ const state = {
   recorder: null
 };
 
-const stepOrder = [
-  "welcome", "consent", "eligibility", "demographics", "sleep", "baselineState", "deviceCheck",
-  "speech", "picture", "tmbIntro", "choiceRt", "digitSymbol", "gradCpt", "mot", "finalSurvey",
-  "baselineComplete", "emaHome", "emaSurvey", "emaSpeech", "emaPicture", "emaFinal", "emaComplete", "done"
-];
+const ONBOARDING_STEPS = ["welcome", "consent", "onboardingProfile", "onboardingCommitment", "onboardingComplete"];
+const EMA_STEPS = ["welcome", "emaSurvey", "emaSpeech", "emaPicture", "choiceRt", "digitSymbol", "gradCpt", "mot", "emaFinal", "emaComplete"];
 
 const COGNITIVE_TASK_KEYS = ["choice_rt", "digit_symbol", "grad_cpt", "mot"];
 
@@ -142,6 +130,12 @@ const COGNITIVE_STEP_BY_TASK = {
   grad_cpt: "gradCpt",
   mot: "mot"
 };
+
+function currentFlowSteps() {
+  if (STUDY_MODE === "qualification") return ["qWelcome", "qConsent", "qProfile", "qSpeech", "qComplete"];
+  if (state.sessionContext?.kind === "ema") return EMA_STEPS;
+  return ONBOARDING_STEPS;
+}
 
 function html(value) {
   return String(value ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -171,8 +165,138 @@ function params() {
 }
 
 function localStateKey() {
-  const suffix = STUDY_MODE === "qualification" ? ":qualification" : "";
+  const suffix = STUDY_MODE === "qualification"
+    ? ":qualification"
+    : `:${state.studyId || state.sessionContext?.key || state.sessionContext?.kind || "main"}`;
   return `mcampus:${state.participantId}:state${suffix}`;
+}
+
+function parsePositiveInt(value) {
+  const num = Number(value);
+  return Number.isInteger(num) && num > 0 ? num : null;
+}
+
+function waveLabel(slot) {
+  return state.config?.studyFlow?.windows?.[slot - 1]
+    || state.config?.ema?.windows?.[slot - 1]
+    || ["Morning", "Afternoon", "Evening"][slot - 1]
+    || `Session ${slot}`;
+}
+
+function emaWindowForSlot(slot) {
+  const window = state.config?.emaSchedule?.windows?.[slot - 1];
+  return window || {
+    label: waveLabel(slot),
+    start: ["08:00", "13:00", "18:00"][slot - 1] || "",
+    end: ["12:00", "17:00", "22:00"][slot - 1] || ""
+  };
+}
+
+function emaScheduleSummary() {
+  const days = state.config?.emaSchedule?.days || state.config?.ema?.days || 12;
+  const sessionsPerDay = state.config?.emaSchedule?.sessionsPerDay || state.config?.ema?.sessionsPerDay || 3;
+  const windows = Array.from({ length: sessionsPerDay }, (_, idx) => emaWindowForSlot(idx + 1));
+  return { days, sessionsPerDay, windows };
+}
+
+function parseWindowTime(value) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function emaAccessStatus() {
+  if (state.sessionContext?.kind !== "ema") return { allowed: true };
+  const now = new Date();
+  const start = parseWindowTime(state.sessionContext.windowStart);
+  const end = parseWindowTime(state.sessionContext.windowEnd);
+  if (start && now < start) return { allowed: false, reason: "too_early", start, end, now };
+  if (end && now > end) return { allowed: false, reason: "expired", start, end, now };
+  return { allowed: true, start, end, now };
+}
+
+function deriveSessionContext() {
+  const queryKind = String(QUERY.get("kind") || QUERY.get("waveKind") || "").trim().toLowerCase();
+  const queryDay = parsePositiveInt(QUERY.get("day"));
+  const querySlot = parsePositiveInt(QUERY.get("slot"));
+  const queryLabel = String(QUERY.get("label") || "").trim();
+
+  if (queryKind === "onboarding") {
+    return {
+      key: state.studyId || "onboarding",
+      kind: "onboarding",
+      title: "Onboarding"
+    };
+  }
+
+  if (queryKind === "main") {
+    return {
+      key: state.studyId || "main",
+      kind: "main",
+      title: "Main longitudinal study"
+    };
+  }
+
+  if (queryKind === "ema" && queryDay && querySlot) {
+    const label = queryLabel || waveLabel(querySlot);
+    return {
+      key: state.studyId || `d${queryDay}s${querySlot}`,
+      kind: "ema",
+      day: queryDay,
+      slot: querySlot,
+      label,
+      title: `Day ${queryDay} ${label}`,
+      windowStart: QUERY.get("windowStart") || "",
+      windowEnd: QUERY.get("windowEnd") || "",
+      reminderId: QUERY.get("reminderId") || ""
+    };
+  }
+
+  const mapped = state.config?.waveMap?.[state.studyId];
+  if (mapped?.kind === "onboarding") {
+    return {
+      key: state.studyId || "onboarding",
+      kind: "onboarding",
+      title: mapped.title || "Onboarding"
+    };
+  }
+  if (mapped?.kind === "ema" && parsePositiveInt(mapped.day) && parsePositiveInt(mapped.slot)) {
+    const slot = parsePositiveInt(mapped.slot);
+    const day = parsePositiveInt(mapped.day);
+    return {
+      key: state.studyId || `d${day}s${slot}`,
+      kind: "ema",
+      day,
+      slot,
+      label: mapped.label || waveLabel(slot),
+      title: mapped.title || `Day ${day} ${mapped.label || waveLabel(slot)}`
+    };
+  }
+
+  if (state.config?.onboardingStudyId && state.studyId === state.config.onboardingStudyId) {
+    return {
+      key: state.studyId,
+      kind: "onboarding",
+      title: "Onboarding"
+    };
+  }
+
+  if (LOCALHOST || DEMO_MODE) {
+    return {
+      key: state.studyId || "onboarding",
+      kind: queryDay && querySlot ? "ema" : "onboarding",
+      day: queryDay || undefined,
+      slot: querySlot || undefined,
+      label: queryDay && querySlot ? (queryLabel || waveLabel(querySlot)) : undefined,
+      title: queryDay && querySlot ? `Day ${queryDay} ${queryLabel || waveLabel(querySlot)}` : "Onboarding"
+    };
+  }
+
+  return {
+    key: state.studyId || "unknown",
+    kind: "unknown",
+    title: "Unmapped study link"
+  };
 }
 
 function prolificCompletionUrl() {
@@ -252,7 +376,7 @@ function go(step) {
 
 function topbar() {
   if (STUDY_MODE === "qualification") {
-    const qSteps = ["qWelcome", "qConsent", "qProfile", "qSpeech", "qComplete"];
+    const qSteps = currentFlowSteps();
     const qIndex = Math.max(0, qSteps.indexOf(state.step));
     return `
       <header class="topbar">
@@ -261,11 +385,17 @@ function topbar() {
       </header>
     `;
   }
-  const idx = Math.max(0, stepOrder.indexOf(state.step));
-  const progress = state.step === "done" ? "Done" : `${idx + 1}/${stepOrder.length}`;
+  const steps = currentFlowSteps();
+  const idx = Math.max(0, steps.indexOf(state.step));
+  const flowLabel = state.sessionContext?.kind === "ema"
+    ? "Daily EMA"
+    : state.sessionContext?.kind === "main"
+      ? "Main study"
+      : "Onboarding";
+  const progress = state.step === "done" ? "Done" : `${idx + 1}/${steps.length}`;
   return `
     <header class="topbar">
-      <div class="brand"><strong>M-CAMPUS</strong><span>Baseline + EMA</span></div>
+      <div class="brand"><strong>M-CAMPUS</strong><span>${html(flowLabel)}</span></div>
       <div class="progress">${progress}</div>
     </header>
   `;
@@ -388,17 +518,143 @@ function welcome() {
     });
     return;
   }
+  if (state.sessionContext?.kind === "unknown") {
+    page(`
+      <h1>Study link not ready</h1>
+      <p class="lead">This study link is not mapped to an onboarding visit or a specific EMA session yet.</p>
+      <div class="band">
+        <p>Please return to Prolific and reopen the correct wave link. If this keeps happening, contact the research team.</p>
+      </div>
+      <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+    `);
+    return;
+  }
+  if (state.sessionContext?.kind === "ema" && !LOCALHOST && !DEMO_MODE && !state.participantStatus?.hasOnboardingComplete) {
+    page(`
+      <h1>Onboarding required first</h1>
+      <p class="lead">This link is for a daily EMA session, but we do not yet see a completed onboarding session for this Prolific ID.</p>
+      <div class="band">
+        <p>Please complete the onboarding wave first, then return to the EMA links. If you believe this is an error, contact the research team.</p>
+      </div>
+      <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+    `);
+    return;
+  }
+  if (state.sessionContext?.kind === "ema" && state.participantStatus?.completedEmaSessions?.includes(state.sessionContext.key) && !LOCALHOST && !DEMO_MODE) {
+    page(`
+      <h1>Session already completed</h1>
+      <p class="lead">This EMA session already has a saved completion for this Prolific ID.</p>
+      <div class="band">
+        <p>Please return to Prolific. Do not repeat this same session.</p>
+      </div>
+      <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+    `);
+    return;
+  }
+  const access = emaAccessStatus();
+  if (state.sessionContext?.kind === "ema" && !access.allowed && !LOCALHOST && !DEMO_MODE) {
+    const windowText = access.start && access.end
+      ? `${access.start.toLocaleString([], { hour: "2-digit", minute: "2-digit" })} - ${access.end.toLocaleString([], { hour: "2-digit", minute: "2-digit" })}`
+      : "the scheduled window";
+    page(`
+      <h1>${access.reason === "expired" ? "This session window has closed" : "This session is not open yet"}</h1>
+      <p class="lead">Please use the link during its scheduled window.</p>
+      <div class="band">
+        <p><strong>Window:</strong> ${html(windowText)}</p>
+        <p>${access.reason === "expired"
+          ? "This EMA session has expired in your local time zone. Please wait for the next scheduled window or reminder."
+          : "Please come back when the window opens in your local time zone. If you were sent here early, wait until the scheduled time."}</p>
+        <p>If this is not within the correct window, go back to Prolific and click Return there.</p>
+      </div>
+    `);
+    return;
+  }
+  if (state.sessionContext?.kind === "ema" && state.ema[state.sessionContext.key]?.done) {
+    go("emaComplete");
+    return;
+  }
+  if (state.sessionContext?.kind === "ema") {
+    const ctx = state.sessionContext;
+    const schedule = emaScheduleSummary();
+    page(`
+      <h1>${html(ctx.title || `Day ${ctx.day} ${ctx.label}`)}</h1>
+      <p class="lead">This link is for one EMA check-in only. Complete this session once, then return to Prolific.</p>
+      <div class="band">
+        <p><strong>Today's flow:</strong> state/context survey, spontaneous speech, picture description, four cognitive tasks, and final feedback.</p>
+        <p><strong>Speech reminders:</strong> respond in your own words, without notes, websites, AI tools, or another device. Natural pauses are expected.</p>
+        <p><strong>Study plan:</strong> ${schedule.days} days, ${schedule.sessionsPerDay} sessions per day. Windows are ${schedule.windows.map(w => `${html(w.label)} ${html(w.start)}-${html(w.end)}`).join("; ")}.</p>
+        <p><strong>Reminder contact:</strong> ${html(state.forms.contact_preference || "not set")} ${state.forms.email ? `email ${html(state.forms.email)}` : ""}${state.forms.phone ? `${state.forms.email ? " / " : ""}phone ${html(state.forms.phone)}` : ""}</p>
+      </div>
+      <div class="field">
+        <label for="pid">Participant ID</label>
+        <input id="pid" class="input" autocomplete="off" value="${html(state.participantId)}" placeholder="Loaded from Prolific when available">
+      </div>
+      <div class="actions"><button class="button" id="start">Start this check-in</button></div>
+    `);
+    document.querySelector("#pid").addEventListener("input", event => {
+      state.participantId = event.target.value.trim();
+      saveLocal();
+    });
+    document.querySelector("#start").onclick = async () => {
+      if (!state.participantId) return alert("Please enter or load a participant ID first.");
+      await logEvent("ema_window_opened", {
+        wave: ctx.key,
+        day: ctx.day,
+        slot: ctx.slot,
+        label: ctx.label,
+        studyPlan: emaScheduleSummary()
+      });
+      if (!state.emaDraft || state.emaDraft.key !== ctx.key) {
+        startEmaDraft({
+          key: ctx.key,
+          day: ctx.day,
+          slot: ctx.slot,
+          label: ctx.label
+        }, ((ctx.day - 1) * (state.config?.studyFlow?.sessionsPerDay || state.config?.ema?.sessionsPerDay || 3)) + (ctx.slot - 1));
+        await logEvent("ema_session_start", {
+          wave: ctx.key,
+          session: state.emaDraft.key,
+          day: state.emaDraft.day,
+          slot: state.emaDraft.slot,
+          slotLabel: state.emaDraft.label,
+          sessionIndex: state.emaDraft.index + 1,
+          spontaneousPrompt: state.emaDraft.spontaneousPrompt,
+          picture: state.emaDraft.picture,
+          pictureScheduleVersion: state.emaDraft.pictureScheduleVersion,
+          pictureSchedulePosition: state.emaDraft.pictureSchedulePosition
+        });
+      }
+      go("emaSurvey");
+    };
+    return;
+  }
+  if (!LOCALHOST && !DEMO_MODE && state.participantStatus?.hasOnboardingComplete) {
+    page(`
+      <h1>Onboarding already completed</h1>
+      <p class="lead">We already have a completed onboarding session for this Prolific ID.</p>
+      <div class="band">
+        <p>Please return to Prolific. Use the scheduled EMA links for the daily sessions.</p>
+      </div>
+      <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+    `);
+    return;
+  }
+  const mainEntry = state.sessionContext?.kind === "main";
   page(`
-    <h1>Start your M-CAMPUS session</h1>
-    <p class="lead">This study includes a baseline session, short questionnaires, randomized speech tasks, cognitive tasks, and a 12-day daily check-in dashboard in one mobile-friendly flow.</p>
+    <h1>${mainEntry ? "Start M-CAMPUS main longitudinal study" : "Start M-CAMPUS onboarding"}</h1>
+    <p class="lead">${mainEntry
+      ? "This is your one-time entry into the full longitudinal study. After this visit, all EMA sessions happen in the app on a schedule."
+      : "This short setup visit confirms your schedule, phone setup, and study expectations before the 12-day EMA phase begins."}</p>
     <div class="field">
       <label for="pid">Participant ID</label>
       <input id="pid" class="input" autocomplete="off" value="${html(state.participantId)}" placeholder="Loaded from Prolific when available">
       <div class="small">For Prolific, this comes from <code>PROLIFIC_PID</code> in the URL.</div>
     </div>
     <div class="band">
-      <h2>Baseline flow</h2>
-      <p>Consent, eligibility, demographics, sleep and state/context questions, mic/device check, randomized open speech, randomized picture description, four brief cognitive tasks, and final interruption feedback.</p>
+      <h2>What happens next</h2>
+      <p>${mainEntry
+        ? "This visit completes the intake stage. After this, the study stays in the app, where 12 days of EMA sessions are scheduled and tracked automatically."
+        : "This onboarding visit is only questionnaires and instructions. After this, you will complete 12 days of EMA, 3 sessions per day, one session per link."}</p>
     </div>
     <div class="actions"><button class="button" id="start">Continue</button></div>
   `);
@@ -413,11 +669,15 @@ function welcome() {
 }
 
 function consent() {
+  if (state.sessionContext?.kind === "ema") {
+    go("emaSurvey");
+    return;
+  }
   page(`
     <h1>Consent</h1>
-    <p class="lead">You are invited to take part in a research study about how thinking and attention vary in daily life, and whether short speech samples and information about your surroundings can help predict these fluctuations.</p>
+    <p class="lead">You are invited to take part in a 12-day mobile study about how thinking and attention vary in daily life, and whether short speech samples and context information can help predict these fluctuations.</p>
     <div class="band">
-      <p><strong>Participation.</strong> You will complete one baseline session of about 25-30 minutes, followed by 12 days of brief daily sessions, 3 times per day, each about 5-7 minutes.</p>
+      <p><strong>Participation.</strong> This onboarding visit is brief. After that, you will complete 12 days of EMA, 3 times per day, with one short session each time you open a scheduled link.</p>
       <p><strong>Tasks.</strong> Each session includes short questionnaires, a 60-90 second spoken response, brief cognitive tasks, and a question about interruptions or experience.</p>
       <p><strong>Risks.</strong> Possible risks include mild fatigue, concentration effort, frustration, and privacy risks because voice recordings can be re-identifiable. Please do not speak names, addresses, passwords, or other private details.</p>
       <p><strong>Data.</strong> Research data are stored with a pseudonymous ID. Speech is not fully anonymous. Data are used for research, not diagnosis, commercial profiling, or automated decisions.</p>
@@ -439,15 +699,144 @@ function consent() {
     saveLocal();
   };
   document.querySelector("#back").onclick = () => go("welcome");
-  document.querySelector("#next").onclick = () => go("eligibility");
+  document.querySelector("#next").onclick = () => go("onboardingProfile");
+}
+
+function onboardingProfile() {
+  if (!state.forms.timezone) {
+    const detectedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    state.forms.timezone = TIME_ZONE_OPTIONS.includes(detectedTimeZone) ? detectedTimeZone : "";
+  }
+  page(`
+    <h1>Scheduling and routines</h1>
+    <p class="lead">A few short items so we can schedule and interpret the EMA sessions correctly.</p>
+    <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
+    <div class="field"><label>Email address</label><input class="input" inputmode="email" autocomplete="email" data-field="email" value="${val("email")}" placeholder="Optional but recommended"></div>
+    <div class="field"><label>Phone number</label><input class="input" inputmode="tel" autocomplete="tel" data-field="phone" value="${val("phone")}" placeholder="Optional but recommended"></div>
+    <div class="field"><label>Preferred contact method <span class="required">*</span></label><select data-field="contact_preference" required>${selectOptions(["Email", "Phone", "Either"], state.forms.contact_preference)}</select></div>
+    <div class="field"><label>Usual bedtime <span class="required">*</span></label><select data-field="usual_bedtime" required>${selectOptions(BEDTIME_OPTIONS, state.forms.usual_bedtime)}</select></div>
+    <div class="field"><label>Usual wake time <span class="required">*</span></label><select data-field="usual_waketime" required>${selectOptions(WAKETIME_OPTIONS, state.forms.usual_waketime)}</select></div>
+    <div class="field"><label>Are you likely to use headphones during most sessions? <span class="required">*</span></label><select data-field="headphones" required>${selectOptions(["No", "Yes, wired", "Yes, wireless", "It depends"], state.forms.headphones)}</select></div>
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
+  `);
+  bindFields();
+  document.querySelector("#back").onclick = () => go("consent");
+  document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      { name: "timezone", label: "Time zone" },
+      { name: "contact_preference", label: "Preferred contact method" },
+      { name: "usual_bedtime", label: "Usual bedtime" },
+      { name: "usual_waketime", label: "Usual wake time" },
+      { name: "headphones", label: "Headphones" }
+    ])) return;
+    const hasEmail = String(state.forms.email || "").trim();
+    const hasPhone = String(state.forms.phone || "").trim();
+    if (!hasEmail && !hasPhone) {
+      showFormError("Please provide an email address or phone number so we can send EMA reminders.", [
+        "email",
+        "phone"
+      ]);
+      return;
+    }
+    await logEvent("onboarding_profile", {
+      timezone: state.forms.timezone,
+      email: state.forms.email || null,
+      phone: state.forms.phone || null,
+      contactPreference: state.forms.contact_preference,
+      usualBedtime: state.forms.usual_bedtime,
+      usualWaketime: state.forms.usual_waketime,
+      headphones: state.forms.headphones
+    });
+    go("onboardingCommitment");
+  };
+}
+
+function onboardingCommitment() {
+  const device = {
+    platform: navigator.platform,
+    language: navigator.language,
+    userAgent: navigator.userAgent,
+    isPhone: isSmartphone(),
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    screen: `${window.screen?.width || ""}x${window.screen?.height || ""}`,
+    pixelRatio: window.devicePixelRatio,
+    maxTouchPoints: navigator.maxTouchPoints || 0,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || null
+  };
+  state.forms.device_metadata = device;
+  page(`
+    <h1>Commitment and phone setup</h1>
+    <p class="lead">Please confirm the rules for the EMA phase.</p>
+    <div class="band">
+      <p><strong>Detected device:</strong> ${html(device.viewport)}, ${html(device.platform || "unknown platform")}</p>
+      <p>You will receive one link per session. Complete only that session each time, then return to Prolific.</p>
+    </div>
+    <label class="choice">
+      <input type="checkbox" data-field="onboarding_phone_ok" ${state.forms.onboarding_phone_ok ? "checked" : ""}>
+      <span>I will complete study sessions on a smartphone with a working microphone and internet connection.</span>
+    </label>
+    <label class="choice">
+      <input type="checkbox" data-field="onboarding_schedule_ok" ${state.forms.onboarding_schedule_ok ? "checked" : ""}>
+      <span>I understand that the study lasts 12 days with 3 sessions per day, and I intend to complete the scheduled sessions.</span>
+    </label>
+    <label class="choice">
+      <input type="checkbox" data-field="onboarding_safe_ok" ${state.forms.onboarding_safe_ok ? "checked" : ""}>
+      <span>I will complete sessions only when it is safe to do so, not while driving or operating machinery.</span>
+    </label>
+    <label class="choice">
+      <input type="checkbox" data-field="onboarding_authenticity" ${state.forms.onboarding_authenticity ? "checked" : ""}>
+      <span>I will answer the speech tasks in my own words without notes, websites, AI tools, or another device.</span>
+    </label>
+    <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Finish onboarding</button></div>
+  `);
+  bindFields();
+  document.querySelector("#back").onclick = () => go("onboardingProfile");
+  document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      { name: "onboarding_phone_ok", label: "Smartphone agreement" },
+      { name: "onboarding_schedule_ok", label: "12-day schedule agreement" },
+      { name: "onboarding_safe_ok", label: "Safety agreement" },
+      { name: "onboarding_authenticity", label: "Speech authenticity agreement" }
+    ])) return;
+    const needed = ["onboarding_phone_ok", "onboarding_schedule_ok", "onboarding_safe_ok", "onboarding_authenticity"];
+    const unchecked = needed.filter(name => state.forms[name] !== true);
+    if (unchecked.length) {
+      showFormError("Please confirm all four study requirements before continuing.", unchecked);
+      return;
+    }
+    if (!device.isPhone && !LOCALHOST && !DEMO_MODE) {
+      showFormError("This study must be completed on a smartphone. Please reopen the study link on an iPhone or Android phone.");
+      await logEvent("device_ineligible", { reason: "smartphone_required", device });
+      return;
+    }
+    await logEvent("onboarding_complete", {
+      forms: state.forms,
+      device
+    });
+    state.baselineComplete = true;
+    saveLocal();
+    go("onboardingComplete");
+  };
+}
+
+function onboardingComplete() {
+  const mainEntry = state.sessionContext?.kind === "main";
+  page(`
+    <h1>${mainEntry ? "Main study saved" : "Onboarding saved"}</h1>
+    <p class="lead">${mainEntry ? "You are enrolled in the longitudinal study." : "Your onboarding responses have been saved."}</p>
+    <div class="band">
+      <p><strong>Next:</strong> ${mainEntry
+        ? "Your EMA sessions will be handled in the app with scheduled reminders and session windows."
+        : "use the scheduled Prolific links for the daily EMA sessions. Each future link is for one session only."}</p>
+      <p>${mainEntry ? "Please keep notifications on and return to the app for each EMA window." : "When an EMA link opens, complete that single check-in and then return to Prolific."}</p>
+    </div>
+    <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+  `);
 }
 
 function eligibility() {
   const q = [
     ["age18_70", "I am between 18 and 70 years old."],
-    ["english_early", "English was one of the main languages I used before age 6."],
-    ["us_raised", "I lived in the United States for most of ages 5-18 and completed most of my schooling there."],
-    ["american_english", "My everyday spoken English is an American English variety."],
     ["smartphone", "I have access to a smartphone with a working microphone and internet connection."],
     ["daily", "I am willing to complete 3 short sessions per day for 12 days."],
     ["audio", "I am willing to provide short audio recordings."],
@@ -495,15 +884,10 @@ function demographics() {
   }
   page(`
     <h1>Baseline profile</h1>
-    <p class="lead">Demographics and language background.</p>
+    <p class="lead">Only a few details we do not already have from screening.</p>
     <div class="field"><label>Age <span class="required">*</span></label><input class="input" inputmode="numeric" data-field="age" value="${val("age")}" required></div>
     <div class="field"><label>Gender <span class="required">*</span></label><select data-field="gender" required>${selectOptions(["Woman", "Man", "Non-binary", "Prefer to self-describe", "Prefer not to say"], state.forms.gender)}</select></div>
     <div class="field"><label>Education <span class="required">*</span></label><select data-field="education" required>${selectOptions(["Secondary school", "Vocational training", "Some college/university", "Bachelor's degree", "Master's degree", "Doctoral degree", "Other"], state.forms.education)}</select></div>
-    <div class="field"><label>Are you bilingual or multilingual? <span class="required">*</span></label><select data-field="multilingual" required>${selectOptions(["No, English only", "Yes, bilingual", "Yes, multilingual", "Prefer not to say"], state.forms.multilingual)}</select></div>
-    <div class="field"><label>When did you begin using English regularly? <span class="required">*</span></label><select data-field="english_start_age" required>${selectOptions(["From birth", "Before age 3", "Age 3-5", "Age 6-12", "After age 12"], state.forms.english_start_age)}</select></div>
-    <div class="field"><label>Where did you spend most of ages 5-18? <span class="required">*</span></label><select data-field="childhood_region" required>${selectOptions(["United States", "Mostly United States and partly elsewhere", "Outside the United States"], state.forms.childhood_region)}</select></div>
-    <div class="field"><label>How would you describe your everyday English dialect or accent? <span class="required">*</span></label><input class="input" data-field="english_dialect" value="${val("english_dialect")}" placeholder="For example: American English, Southern US English" required></div>
-    <div class="field"><label>Country <span class="required">*</span></label><select data-field="country" required>${selectOptions(COUNTRY_OPTIONS, state.forms.country)}</select></div>
     <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
     <div class="actions"><button class="button secondary" id="back">Back</button><button class="button" id="next">Continue</button></div>
   `);
@@ -514,11 +898,6 @@ function demographics() {
       { name: "age", label: "Age" },
       { name: "gender", label: "Gender" },
       { name: "education", label: "Education" },
-      { name: "multilingual", label: "Bilingual or multilingual" },
-      { name: "english_start_age", label: "Age English use began" },
-      { name: "childhood_region", label: "Childhood region" },
-      { name: "english_dialect", label: "English dialect or accent" },
-      { name: "country", label: "Country" },
       { name: "timezone", label: "Time zone" }
     ])) return;
     if (!requireNumericRange("age", "Age", 18, 70)) return;
@@ -1457,45 +1836,7 @@ function buildPictureSchedule() {
 }
 
 function emaHome() {
-  const rows = [];
-  for (let day = 1; day <= state.config.ema.days; day += 1) {
-    for (let slot = 0; slot < state.config.ema.sessionsPerDay; slot += 1) {
-      const key = `d${day}s${slot + 1}`;
-      rows.push({ key, day, slot: slot + 1, label: state.config.ema.windows[slot], done: state.ema[key]?.done });
-    }
-  }
-  page(`
-    <h1>EMA dashboard</h1>
-    <p class="lead">Researcher/session dashboard. Participants should complete one check-in per link or reminder, then stop when the check-in saved page appears.</p>
-    <div class="actions"><button class="button" id="nextDue">Start next check-in</button></div>
-    <div class="schedule">
-      ${rows.map(row => `
-        <div class="session-row">
-          <div><strong>Day ${row.day}</strong><br><span class="small">${html(row.label)}</span></div>
-          <span class="pill ${row.done ? "done" : ""}">${row.done ? "Done" : "Due"}</span>
-        </div>
-      `).join("")}
-    </div>
-    <div class="actions"><button class="button" id="finish">Finish study</button></div>
-  `);
-  document.querySelector("#nextDue").onclick = () => {
-    const next = rows.find(row => !row.done) || rows[0];
-    startEmaDraft(next, rows.findIndex(r => r.key === next.key));
-    saveLocal();
-    logEvent("ema_session_start", {
-      session: state.emaDraft.key,
-      day: state.emaDraft.day,
-      slot: state.emaDraft.slot,
-      slotLabel: state.emaDraft.label,
-      sessionIndex: state.emaDraft.index + 1,
-      spontaneousPrompt: state.emaDraft.spontaneousPrompt,
-      picture: state.emaDraft.picture,
-      pictureScheduleVersion: state.emaDraft.pictureScheduleVersion,
-      pictureSchedulePosition: state.emaDraft.pictureSchedulePosition
-    });
-    go("emaSurvey");
-  };
-  document.querySelector("#finish").onclick = () => go("done");
+  go("welcome");
 }
 
 function startEmaDraft(row, index = 0) {
@@ -1508,6 +1849,7 @@ function startEmaDraft(row, index = 0) {
     day: row.day,
     slot: row.slot,
     label: row.label,
+    waveTitle: state.sessionContext?.title || `Day ${row.day} ${row.label}`,
     index,
     startedAt: new Date().toISOString(),
     spontaneousPrompt: speech,
@@ -1523,21 +1865,30 @@ function startEmaDraft(row, index = 0) {
 
 function ensureEmaDraft() {
   if (state.emaDraft) return state.emaDraft;
+  if (state.sessionContext?.kind === "ema") {
+    const index = ((state.sessionContext.day - 1) * (state.config?.studyFlow?.sessionsPerDay || state.config?.ema?.sessionsPerDay || 3)) + (state.sessionContext.slot - 1);
+    startEmaDraft({
+      key: state.sessionContext.key,
+      day: state.sessionContext.day,
+      slot: state.sessionContext.slot,
+      label: state.sessionContext.label
+    }, index);
+    return state.emaDraft;
+  }
   const [dayPart, sessionPart] = (state.currentEma || "d1s1").replace("d", "").split("s");
-  const row = {
+  startEmaDraft({
     key: state.currentEma || "d1s1",
     day: Number(dayPart || 1),
     slot: Number(sessionPart || 1),
-    label: state.config.ema.windows[Number(sessionPart || 1) - 1] || "Morning"
-  };
-  startEmaDraft(row, 0);
+    label: waveLabel(Number(sessionPart || 1))
+  }, 0);
   return state.emaDraft;
 }
 
 function emaSurvey() {
   const draft = ensureEmaDraft();
   page(`
-    <h1>Day ${draft.day}: ${html(draft.label)}</h1>
+    <h1>${html(draft.waveTitle || `Day ${draft.day}: ${draft.label}`)}</h1>
     <p class="lead">First, answer based on how you feel right now.</p>
     ${scaleRows([["mood", "Mood"], ["stress", "Stress"], ["fatigue", "Fatigue"], ["focus", "Difficulty focusing"], ["noise", "Background noise"]], `ema_${draft.key}`, "Low", "High")}
     <div class="field"><label>Where are you?</label><select data-field="ema_${draft.key}_location">${selectOptions(["Home", "Work or school", "Public indoor place", "Outdoors", "In transit", "Other"], state.forms[`ema_${draft.key}_location`])}</select></div>
@@ -1545,8 +1896,11 @@ function emaSurvey() {
     <div class="actions"><button class="button secondary" id="cancel">Back</button><button class="button" id="next">Continue</button></div>
   `);
   bindFields();
-  document.querySelector("#cancel").onclick = () => go("emaHome");
+  document.querySelector("#cancel").onclick = () => go("welcome");
   document.querySelector("#next").onclick = async () => {
+    if (!requireFields([
+      ...scaleFieldList([["mood", "Mood"], ["stress", "Stress"], ["fatigue", "Fatigue"], ["focus", "Difficulty focusing"], ["noise", "Background noise"]], `ema_${draft.key}`)
+    ])) return;
     draft.survey = {
       mood: state.forms[`ema_${draft.key}_mood`],
       stress: state.forms[`ema_${draft.key}_stress`],
@@ -1651,8 +2005,8 @@ function emaFinal() {
       ...draft
     };
     state.emaDraft = null;
-    state.cognitivePhase = "baseline";
-    state.cognitiveReturn = "finalSurvey";
+    state.cognitivePhase = "ema";
+    state.cognitiveReturn = "emaFinal";
     state.cognitiveOrder = [];
     saveLocal();
     await logEvent("ema_complete", { session: draft.key, ...state.ema[draft.key] });
@@ -1665,14 +2019,19 @@ function emaComplete() {
     <h1>Check-in saved</h1>
     <p class="lead">This daily check-in is complete and has been saved on the study server.</p>
     <div class="band">
-      <p><strong>You are done for this session.</strong> Please return to Prolific or close this tab, depending on the instructions for this check-in.</p>
-      <p>Complete the next EMA session only when you receive the next study link or reminder.</p>
+      <p><strong>You are done for this session.</strong> Return to the study hub or Prolific flow you came from.</p>
+      <p>Complete the next EMA session only when you receive the next scheduled window or link.</p>
     </div>
-    <div class="actions"><a class="button" href="${html(state.config.prolificCompletionUrl)}">Return to Prolific</a></div>
-    ${LOCALHOST || DEMO_MODE ? `<div class="actions"><button class="button secondary" id="emaTest">Researcher test: open EMA dashboard</button></div>` : ""}
+    <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
+    ${LOCALHOST || DEMO_MODE ? `<div class="actions"><button class="button secondary" id="emaTest">Researcher test: restart this session</button></div>` : ""}
   `);
   const emaTest = document.querySelector("#emaTest");
-  if (emaTest) emaTest.onclick = () => go("emaHome");
+  if (emaTest) emaTest.onclick = () => {
+    state.emaDraft = null;
+    delete state.ema[state.sessionContext?.key || state.currentEma];
+    saveLocal();
+    go("welcome");
+  };
 }
 
 async function admin() {
@@ -1849,40 +2208,37 @@ function render() {
   }
   if (state.step === "welcome") welcome();
   else if (state.step === "consent") consent();
-  else if (state.step === "eligibility") eligibility();
-  else if (state.step === "demographics") demographics();
-  else if (state.step === "sleep") sleep();
-  else if (state.step === "baselineState") baselineState();
-  else if (state.step === "deviceCheck") deviceCheck();
-  else if (state.step === "speech") speechTask();
-  else if (state.step === "picture") pictureTask();
-  else if (state.step === "tmbIntro") tmbIntro();
+  else if (state.step === "onboardingProfile") onboardingProfile();
+  else if (state.step === "onboardingCommitment") onboardingCommitment();
+  else if (state.step === "onboardingComplete") onboardingComplete();
+  else if (state.step === "emaSurvey") emaSurvey();
+  else if (state.step === "emaSpeech") emaSpeech();
+  else if (state.step === "emaPicture") emaPicture();
   else if (state.step === "choiceRt") choiceRt();
   else if (state.step === "digitSymbol") digitSymbol();
   else if (state.step === "gradCpt") gradCpt();
   else if (state.step === "mot") mot();
-  else if (state.step === "finalSurvey") finalSurvey();
-  else if (state.step === "baselineComplete") baselineComplete();
-  else if (state.step === "emaHome") emaHome();
-  else if (state.step === "emaSurvey") emaSurvey();
-  else if (state.step === "emaSpeech") emaSpeech();
-  else if (state.step === "emaPicture") emaPicture();
   else if (state.step === "emaFinal") emaFinal();
   else if (state.step === "emaComplete") emaComplete();
   else if (state.step === "admin") admin();
-  else done();
+  else go("welcome");
 }
 
 async function init() {
   try {
     state.config = await api("/api/config");
     restoreLocal();
+    state.sessionContext = deriveSessionContext();
     if (STUDY_MODE === "qualification" && state.participantId && !LOCALHOST && !DEMO_MODE) {
       state.repeatBlock = await api(`/api/participant-status?participantId=${encodeURIComponent(state.participantId)}`).catch(() => null);
     }
+    if (STUDY_MODE !== "qualification" && state.participantId && !DEMO_MODE) {
+      state.participantStatus = await api(`/api/participant-status?participantId=${encodeURIComponent(state.participantId)}`).catch(() => null);
+    }
     if (STUDY_MODE === "qualification" && !String(state.step).startsWith("q")) state.step = "qWelcome";
+    if (STUDY_MODE !== "qualification" && !currentFlowSteps().includes(state.step)) state.step = "welcome";
     render();
-    logEvent("app_open", params());
+    logEvent("app_open", { ...params(), sessionContext: state.sessionContext });
     document.addEventListener("visibilitychange", () => logEvent("visibility_change", { visibilityState: document.visibilityState }));
   } catch (err) {
     app.innerHTML = `
