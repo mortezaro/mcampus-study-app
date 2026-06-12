@@ -707,8 +707,11 @@ function onboardingProfile() {
     state.forms.timezone = TIME_ZONE_OPTIONS.includes(detectedTimeZone) ? detectedTimeZone : "";
   }
   page(`
-    <h1>Scheduling and routines</h1>
-    <p class="lead">A few short items we have not already captured in screening.</p>
+    <h1>Onboarding questionnaire</h1>
+    <p class="lead">A few one-time questions we have not already captured in screening.</p>
+    <div class="field"><label>Age <span class="required">*</span></label><input class="input" inputmode="numeric" data-field="age" value="${val("age")}" required></div>
+    <div class="field"><label>Gender <span class="required">*</span></label><select data-field="gender" required>${selectOptions(["Woman", "Man", "Non-binary", "Prefer to self-describe", "Prefer not to say"], state.forms.gender)}</select></div>
+    <div class="field"><label>Education <span class="required">*</span></label><select data-field="education" required>${selectOptions(["Secondary school", "Vocational training", "Some college/university", "Bachelor's degree", "Master's degree", "Doctoral degree", "Other"], state.forms.education)}</select></div>
     <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
     <div class="field"><label>Usual bedtime <span class="required">*</span></label><select data-field="usual_bedtime" required>${selectOptions(BEDTIME_OPTIONS, state.forms.usual_bedtime)}</select></div>
     <div class="field"><label>Usual wake time <span class="required">*</span></label><select data-field="usual_waketime" required>${selectOptions(WAKETIME_OPTIONS, state.forms.usual_waketime)}</select></div>
@@ -719,12 +722,19 @@ function onboardingProfile() {
   document.querySelector("#back").onclick = () => go("consent");
   document.querySelector("#next").onclick = async () => {
     if (!requireFields([
+      { name: "age", label: "Age" },
+      { name: "gender", label: "Gender" },
+      { name: "education", label: "Education" },
       { name: "timezone", label: "Time zone" },
       { name: "usual_bedtime", label: "Usual bedtime" },
       { name: "usual_waketime", label: "Usual wake time" },
       { name: "headphones", label: "Headphones" }
     ])) return;
+    if (!requireNumericRange("age", "Age", 18, 70)) return;
     await logEvent("onboarding_profile", {
+      age: state.forms.age,
+      gender: state.forms.gender,
+      education: state.forms.education,
       timezone: state.forms.timezone,
       usualBedtime: state.forms.usual_bedtime,
       usualWaketime: state.forms.usual_waketime,
@@ -809,9 +819,9 @@ function onboardingComplete() {
     <p class="lead">${mainEntry ? "You are enrolled in the longitudinal study." : "Your onboarding responses have been saved."}</p>
     <div class="band">
       <p><strong>Next:</strong> ${mainEntry
-        ? "Your EMA sessions will be handled in the app with scheduled reminders and session windows."
+        ? "Your EMA sessions will be handled through the study app and the scheduled Prolific waves."
         : "use the scheduled Prolific links for the daily EMA sessions. Each future link is for one session only."}</p>
-      <p>${mainEntry ? "Please keep notifications on and return to the app for each EMA window." : "When an EMA link opens, complete that single check-in and then return to Prolific."}</p>
+      <p>${mainEntry ? "Complete each session only during its assigned Prolific wave/window." : "When an EMA link opens, complete that single check-in and then return to Prolific."}</p>
     </div>
     <div class="actions"><a class="button" href="${html(prolificCompletionUrl())}">Return to Prolific</a></div>
   `);

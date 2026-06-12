@@ -5,23 +5,19 @@ Use this before inviting real participants.
 ## Local Phone Pilot
 
 - Open the app on iPhone Safari and Android Chrome over HTTPS or an approved tunnel.
-- Complete baseline without `demo=1`.
-- Record baseline spontaneous speech for at least 30 seconds.
-- Record baseline picture-description speech for at least 30 seconds.
-- Confirm two uploaded audio files appear in `data/uploads`.
-- Confirm `audio_upload` and `recording_complete` events appear in `data/events.jsonl`.
-- Complete all four baseline TMB tasks.
+- Complete onboarding without `demo=1`.
+- Confirm onboarding includes consent, one-time questionnaire items, and study instructions only.
+- Confirm onboarding does not include speech tasks or cognitive tasks.
+- Confirm one EMA session without `demo=1` includes survey, spontaneous speech, picture description, Choice RT, Digit Symbol, GradCPT, MOT, and final feedback.
+- Confirm two EMA audio uploads appear in `data/uploads`.
+- Confirm `audio_upload`, `recording_complete`, `ema_window_opened`, and `ema_complete` events appear in `data/events.jsonl`.
 - Confirm `tmb_official_task_result` events include `outcomes`, `results`, and `trialCount`.
-- Complete one EMA session without `demo=1`.
-- Confirm EMA includes survey, spontaneous speech, picture description, Choice RT, Digit Symbol, GradCPT, MOT, and final feedback.
-- Confirm `ema_window_opened` and `ema_complete` events appear for at least one pilot session.
 - Confirm an expired EMA link is blocked outside its window.
-- Confirm onboarding collects an email or phone number for reminders.
 - Confirm EMA GradCPT URL does not include `picsInput_300imgs_32nogo.txt`.
 
 ## Study Configuration
 
-- Run a separate 2-3 minute paid voice-qualification study before the baseline.
+- Run a separate 2-3 minute paid voice-qualification study before onboarding.
 - Pay all qualification participants fairly, then invite only eligible, natural-speech participants to the longitudinal project.
 - In the new Prolific project, use United States residence, English first language, United States childhood/upbringing criteria where available, mobile, and microphone screeners.
 - Do not use race as a proxy for language background or accent.
@@ -51,5 +47,5 @@ Use this before inviting real participants.
 - Store events in a database, not only JSONL.
 - Back up data regularly.
 - Password-protect or remove the admin view.
-- Add EMA reminders through SMS/email/push scheduling.
+- Confirm Prolific wave timing and instructions match the intended EMA windows.
 - Document retention, deletion, and withdrawal handling.

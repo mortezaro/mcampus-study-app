@@ -1,12 +1,12 @@
 # M-CAMPUS Study App
 
-Phone-first baseline and EMA app for the M-CAMPUS Mobile Cognition Study.
+Phone-first onboarding and EMA app for the M-CAMPUS Mobile Cognition Study.
 
 ## What It Does
 
 - Captures Prolific IDs from `PROLIFIC_PID`, `pid`, or manual entry.
-- Captures email or phone contact details for reminder delivery during onboarding.
-- Runs consent, eligibility, demographics, sleep, PANAS-style state/context questionnaires, device/mic check, randomized open speech, randomized picture description, cognitive tasks, final interruption/feedback questions, and EMA check-ins.
+- Runs one-time onboarding with consent, unique demographics/sleep/setup questions, and study instructions.
+- Runs EMA check-ins with state/context questionnaires, randomized open speech, randomized picture description, cognitive tasks, and final interruption/feedback questions.
 - Includes 24 Appendix A narrative prompts and 12 picture-description scene slots from the protocol.
 - Uses the standard open-source TestMyBrain task pages for Choice RT, Digit Symbol Matching, GradCPT, and MOT from `manybrainsproject/TestMyBrainCodeRepo`.
 - Each EMA session now includes state/context survey, spontaneous speech, structured picture-description speech, Choice RT, Digit Symbol Matching, GradCPT, MOT, and interruption/feedback questions.
@@ -14,7 +14,6 @@ Phone-first baseline and EMA app for the M-CAMPUS Mobile Cognition Study.
 - Uploads audio to `data/uploads`.
 - Captures official TMB outcomes and trial rows back into `data/events.jsonl`.
 - Logs all events to `data/events.jsonl`.
-- Records EMA plan and reminder events so an external scheduler can target the right day and slot.
 - Includes a simple researcher view at the EMA dashboard.
 
 ## Run Locally
@@ -56,19 +55,16 @@ Set these environment variables on the hosting service:
 - `ADMIN_TOKEN=<long random secret>`
 - `MAX_UPLOAD_MB=25`
 - `DATA_DIR=/data` or the path to the service's persistent disk/volume
-- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER` for SMS reminders
-- `SENDGRID_API_KEY`, `SENDGRID_FROM_EMAIL` for email reminders
-
 In production, `/api/admin/events` is disabled unless `ADMIN_TOKEN` is set.
 
 ## Suggested Prolific Setup
 
-If you want to stay within Prolific's wave limit, use two Prolific projects with the same approved cohort:
+Use Prolific as the scheduler and participant tracker:
 
-1. Project A: onboarding plus the first EMA block.
-2. Project B: the remaining EMA block.
+1. One onboarding wave that uses `kind=onboarding`.
+2. EMA waves that use `kind=ema` and include the mapped day/slot labels.
 
-In both projects, the app remains the source of truth for session windows and completion logging. Set `PROLIFIC_WAVE_MAP_JSON` so the onboarding study ID maps to `kind=onboarding`, and each EMA study ID maps to `kind=ema` with its day, slot, and label.
+Set `PROLIFIC_WAVE_MAP_JSON` so the onboarding study ID maps to `kind=onboarding`, and each EMA study ID maps to `kind=ema` with its day, slot, and label.
 
 Example:
 
@@ -91,10 +87,6 @@ With `ADMIN_TOKEN` set, use these protected endpoints:
 - `/api/admin/events?token=ADMIN_TOKEN` exports all logged study events, including questionnaires, cognitive task order/position, TMB outcomes/trial rows, recording metadata, and upload events.
 - `/api/admin/uploads?token=ADMIN_TOKEN` lists uploaded audio files from the persistent disk.
 - `/api/admin/uploads/FILENAME?token=ADMIN_TOKEN` downloads a single uploaded audio file.
-- `/api/admin/reminders?token=ADMIN_TOKEN` accepts reminder logs from an external scheduler or messaging service.
-- The reminder endpoint also returns a fully formed EMA target URL for the matching day/slot window.
-- When Twilio or SendGrid credentials are present, the reminder endpoint sends the message immediately and logs delivery status.
-
 ## Deployment Shape
 
 For a real study, deploy this as a HTTPS web app. Mobile participants should use the normal browser on their phone, usually Safari on iPhone/iOS and Chrome on Android. No App Store or Google Play app is needed.
@@ -104,8 +96,6 @@ Good hosting options:
 - Render/Fly/Railway for the Node server.
 - S3/R2/Supabase Storage for audio files.
 - Postgres/Supabase for structured events.
-- Twilio/SendGrid/email for EMA reminders.
-
 Microphone recording requires HTTPS in production. Localhost is allowed for testing.
 
 ## Deploy To Render
