@@ -12,24 +12,12 @@ const SPEECH_PROMPTS = [
   "Think of a type of task that you generally find mentally demanding. Walk us through what it usually involves and how it typically feels for you.",
   "Describe what it is generally like for you when you feel mentally tired but continue with your activities. What kinds of things do you usually do in those situations?",
   "In a typical day, when do you tend to feel most alert and when do you tend to feel more tired? What are you usually doing at those times?",
-  "Tell us about types of tasks that usually require more mental effort for you than you expect. What tends to make them feel harder, and how do you typically adapt?",
-  "Describe a place where you often spend time. How does that kind of environment usually affect your ability to focus, if at all?",
   "Describe the kinds of interruptions that commonly happen when you are trying to focus on something, and what usually happens afterwards.",
   "Describe situations in your daily life when you need to switch quickly from one task to another. What kinds of tasks are involved, and how does that switch usually feel for you?",
-  "Describe a place where you often do things that require concentration. What, if anything, makes it easier or harder to concentrate there?",
   "Describe some strategies you use to remember important things you need to do, and how well they usually work for you.",
   "Tell us about how you usually plan your day or week. What kinds of steps do you take, and how do you keep track of them?",
-  "Think about the kinds of strategies you typically use to remember things, such as notes, alarms, or repeating things to yourself. Describe how you use them and how well they tend to work.",
   "Describe situations in your life where you often have to keep track of several things at once. How do you usually manage this, and how does it typically go?",
-  "Think about situations in your life that usually require you to stay mentally organised or focused. Describe what tends to happen and how this usually affects your ability to think clearly.",
-  "Describe types of moments in your day that you usually find positive or enjoyable. What tends to happen, how do you usually feel, and what do you notice about your focus or energy at those times?",
-  "In general, what kinds of things tend to change your mood during the day, and does that usually affect what you are doing?",
-  "Describe the kinds of conversations or interactions with other people that often stand out to you in a typical day. What are these situations usually like, and how do the conversations tend to go?",
-  "Tell us about situations in general where it can be harder for you to get your point across or to understand someone else. What tends to make communication more difficult in those cases?",
-  "Describe what a clear and effective conversation usually looks like for you. What kinds of things help you communicate especially clearly?",
-  "Describe a typical sequence of events in a usual day for you, from when you wake up until later in the day. Include a few things that usually feel easy and a few that usually require more effort.",
-  "Thinking about an ordinary day, what are one or two activities you generally feel satisfied with, and why?",
-  "Thinking about your usual days, describe how your energy and focus tend to change from morning to evening."
+  "Tell us about situations in general where it can be harder for you to get your point across or to understand someone else. What tends to make communication more difficult in those cases?"
 ];
 
 const PICTURES = [
@@ -1845,14 +1833,53 @@ function buildPictureSchedule() {
   return schedule;
 }
 
+function buildSpeechPromptSchedule() {
+  const prompts = promptBank();
+  const sessionsPerDay = state.config.ema.sessionsPerDay;
+  const days = state.config.ema.days;
+  const schedule = Array.from({ length: days * sessionsPerDay });
+
+  for (let slot = 0; slot < sessionsPerDay; slot += 1) {
+    const slotOrder = prompts
+      .map((prompt, index) => ({ prompt, rank: uidHash(`${state.participantId}:speech-slot:${slot}:${index}`, 100000) }))
+      .sort((a, b) => a.rank - b.rank)
+      .map(item => item.prompt);
+    for (let day = 0; day < days; day += 1) {
+      schedule[day * sessionsPerDay + slot] = slotOrder[day % slotOrder.length];
+    }
+  }
+
+  for (let i = 1; i < schedule.length; i += 1) {
+    if (schedule[i] !== schedule[i - 1]) continue;
+    const slot = i % sessionsPerDay;
+    const swap = schedule.findIndex((prompt, j) => {
+      if (j <= i || j % sessionsPerDay !== slot) return false;
+      const current = schedule[i];
+      const leftOk = prompt !== schedule[i - 1];
+      const rightOk = i + 1 >= schedule.length || prompt !== schedule[i + 1];
+      const swapLeftOk = j === 0 || current !== schedule[j - 1];
+      const swapRightOk = j + 1 >= schedule.length || current !== schedule[j + 1];
+      return leftOk && rightOk && swapLeftOk && swapRightOk;
+    });
+    if (swap > i) {
+      const tmp = schedule[i];
+      schedule[i] = schedule[swap];
+      schedule[swap] = tmp;
+    }
+  }
+
+  return schedule;
+}
+
 function emaHome() {
   go("welcome");
 }
 
 function startEmaDraft(row, index = 0) {
-  const schedule = buildPictureSchedule();
-  const pic = pictureBank().find(x => x.id === schedule[index % schedule.length]) || pictureBank()[0];
-  const speech = promptBank()[uidHash(`${state.participantId}:${row.key}:speech`, promptBank().length)];
+  const pictureSchedule = buildPictureSchedule();
+  const speechSchedule = buildSpeechPromptSchedule();
+  const pic = pictureBank().find(x => x.id === pictureSchedule[index % pictureSchedule.length]) || pictureBank()[0];
+  const speech = speechSchedule[index % speechSchedule.length] || promptBank()[0];
   state.currentEma = row.key;
   state.emaDraft = {
     key: row.key,
@@ -1864,6 +1891,8 @@ function startEmaDraft(row, index = 0) {
     startedAt: new Date().toISOString(),
     spontaneousPrompt: speech,
     picture: pic,
+    speechScheduleVersion: "balanced-slot-v1",
+    speechSchedulePosition: index + 1,
     pictureScheduleVersion: "balanced-slot-v1",
     pictureSchedulePosition: index + 1,
     survey: {},
