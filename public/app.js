@@ -716,7 +716,7 @@ function onboardingProfile() {
     <h1>Onboarding questionnaire</h1>
     <p class="lead">A few one-time questions we have not already captured in screening.</p>
     <div class="field"><label>Age <span class="required">*</span></label><input class="input" inputmode="numeric" data-field="age" value="${val("age")}" required></div>
-    <div class="field"><label>Gender <span class="required">*</span></label><select data-field="gender" required>${selectOptions(["Woman", "Man", "Non-binary", "Prefer to self-describe", "Prefer not to say"], state.forms.gender)}</select></div>
+    <div class="field"><label>Gender <span class="required">*</span></label><select data-field="gender" required>${selectOptions(["Woman", "Man", "Prefer to self-describe"], state.forms.gender)}</select></div>
     <div class="field"><label>Education <span class="required">*</span></label><select data-field="education" required>${selectOptions(["Secondary school", "Vocational training", "Some college/university", "Bachelor's degree", "Master's degree", "Doctoral degree", "Other"], state.forms.education)}</select></div>
     <div class="field"><label>Time zone <span class="required">*</span></label><select data-field="timezone" required>${selectOptions(TIME_ZONE_OPTIONS, state.forms.timezone)}</select></div>
     <div class="field"><label>Usual bedtime <span class="required">*</span></label><select data-field="usual_bedtime" required>${selectOptions(BEDTIME_OPTIONS, state.forms.usual_bedtime)}</select></div>
