@@ -61,7 +61,7 @@ const CONFIG = {
   onboardingStudyId: process.env.ONBOARDING_STUDY_ID || "",
   waveMap: WAVE_MAP,
   emaSchedule: {
-    days: 12,
+    days: 11,
     sessionsPerDay: 3,
     windows: [
       { label: "Morning", start: "08:00", end: "12:00" },
@@ -97,7 +97,7 @@ const CONFIG = {
     }
   ],
   ema: {
-    days: 12,
+    days: 11,
     sessionsPerDay: 3,
     windows: ["Morning", "Afternoon", "Evening"],
     speechPrompt: "Please say one or two sentences about what you are doing or thinking right now."
@@ -105,7 +105,7 @@ const CONFIG = {
   studyFlow: {
     onboardingKind: "onboarding",
     emaKind: "ema",
-    days: 12,
+    days: 11,
     sessionsPerDay: 3,
     windows: ["Morning", "Afternoon", "Evening"]
   }

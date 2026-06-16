@@ -181,7 +181,7 @@ function emaWindowForSlot(slot) {
 }
 
 function emaScheduleSummary() {
-  const days = state.config?.emaSchedule?.days || state.config?.ema?.days || 12;
+  const days = state.config?.emaSchedule?.days || state.config?.ema?.days || 11;
   const sessionsPerDay = state.config?.emaSchedule?.sessionsPerDay || state.config?.ema?.sessionsPerDay || 3;
   const windows = Array.from({ length: sessionsPerDay }, (_, idx) => emaWindowForSlot(idx + 1));
   return { days, sessionsPerDay, windows };
@@ -570,8 +570,8 @@ function welcome() {
     <div class="band">
       <h2>What happens next</h2>
       <p>${mainEntry
-        ? "This visit completes the intake stage. After this, the study stays in the app, where 12 days of EMA sessions are scheduled and tracked automatically."
-        : "This onboarding visit is only questionnaires and instructions. After this, you will complete 12 days of EMA, 3 sessions per day, one session per link."}</p>
+        ? "This visit completes the intake stage. After this, the study stays in the app, where 11 days of EMA sessions are scheduled and tracked automatically."
+        : "This onboarding visit is only questionnaires and instructions. After this, you will complete 11 days of EMA, 3 sessions per day, one session per link."}</p>
       <p>${mainEntry
         ? "The task flow includes clear instructions, brief practice where applicable, and corrective feedback during the task experience."
         : "This virtual onboarding also explains how the task flow works, including task instructions, brief practice where applicable, and corrective feedback during the task experience."}</p>
@@ -597,7 +597,7 @@ function consent() {
     <h1>Consent</h1>
     <p class="lead">You are invited to take part in a 12-day mobile study about how thinking and attention vary in daily life, and whether short speech samples and context information can help predict these fluctuations.</p>
     <div class="band">
-      <p><strong>Participation.</strong> This onboarding visit is brief. After that, you will complete 12 days of EMA, 3 times per day, with one short session each time you open a scheduled link.</p>
+      <p><strong>Participation.</strong> This onboarding visit is brief. After that, you will complete 11 days of EMA, 3 times per day, with one short session each time you open a scheduled link.</p>
       <p><strong>Tasks.</strong> Each session includes short questionnaires, a 60-90 second spoken response, brief cognitive tasks, and a question about interruptions or experience.</p>
       <p><strong>Virtual onboarding.</strong> Participants review the task instructions up front. The task flow also includes brief practice where applicable and corrective feedback during the task experience.</p>
       <p><strong>Completion bonuses.</strong> Participants can qualify for bonus tiers by completing at least 80%, 90%, or 100% of the scheduled sessions, according to the study payment plan.</p>
@@ -705,7 +705,7 @@ function onboardingCommitment() {
     </label>
     <label class="choice">
       <input type="checkbox" data-field="onboarding_schedule_ok" ${state.forms.onboarding_schedule_ok ? "checked" : ""}>
-      <span>I understand that the study lasts 12 days with 3 sessions per day, and I intend to complete the scheduled sessions.</span>
+      <span>I understand that the study lasts 11 days with 3 sessions per day, and I intend to complete the scheduled sessions.</span>
     </label>
     <label class="choice">
       <input type="checkbox" data-field="onboarding_safe_ok" ${state.forms.onboarding_safe_ok ? "checked" : ""}>
@@ -766,7 +766,7 @@ function eligibility() {
   const q = [
     ["age18_70", "I am between 18 and 70 years old."],
     ["smartphone", "I have access to a smartphone with a working microphone and internet connection."],
-    ["daily", "I am willing to complete 3 short sessions per day for 12 days."],
+    ["daily", "I am willing to complete 3 short sessions per day for 11 days."],
     ["audio", "I am willing to provide short audio recordings."],
     ["no_neuro", "I do not have a neurological disorder that would make the tasks unsuitable."],
     ["no_speech_hearing", "I do not have a major uncorrected speech or hearing impairment."],
