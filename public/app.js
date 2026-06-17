@@ -32,13 +32,36 @@ const PICTURES = [
   ["picture_09", "Picture 9", "/assets/pictures/picture_09.png"],
   ["picture_10", "Picture 10", "/assets/pictures/picture_10.png"],
   ["picture_11", "Picture 11", "/assets/pictures/picture_11.png"],
-  ["picture_12", "Picture 12", "/assets/pictures/picture_12.png"]
+  ["picture_12", "Picture 12", "/assets/pictures/picture_12.png"],
+  ["picture_13", "Picture 13", "/assets/pictures/picture_13.png"],
+  ["picture_14", "Picture 14", "/assets/pictures/picture_14.png"],
+  ["picture_15", "Picture 15", "/assets/pictures/picture_15.png"],
+  ["picture_16", "Picture 16", "/assets/pictures/picture_16.png"],
+  ["picture_17", "Picture 17", "/assets/pictures/picture_17.png"],
+  ["picture_18", "Picture 18", "/assets/pictures/picture_18.png"],
+  ["picture_19", "Picture 19", "/assets/pictures/picture_19.png"],
+  ["picture_20", "Picture 20", "/assets/pictures/picture_20.png"]
 ].map(([id, title, src]) => ({
   id,
   title,
   prompt: "Please describe this picture in as much detail as you can. Mention the main people or objects, actions, setting, and anything unusual.",
   src
 }));
+
+const FIXED_PICTURE_SCHEDULE = [
+  "picture_01", "picture_02", "picture_03",
+  "picture_04", "picture_05", "picture_06",
+  "picture_07", "picture_08", "picture_09",
+  "picture_10", "picture_11", "picture_12",
+  "picture_13", "picture_14", "picture_15",
+  "picture_16", "picture_17", "picture_18",
+  "picture_19", "picture_20",
+  "picture_01", "picture_02", "picture_03",
+  "picture_04", "picture_05", "picture_06",
+  "picture_07", "picture_08", "picture_09",
+  "picture_13", "picture_14", "picture_15",
+  "picture_16"
+];
 
 const TIME_ZONE_OPTIONS = [
   "America/New_York",
@@ -1726,38 +1749,15 @@ function baselineComplete() {
 }
 
 function buildPictureSchedule() {
-  const pics = pictureBank();
   const sessionsPerDay = state.config.ema.sessionsPerDay;
   const days = state.config.ema.days;
-  const schedule = Array.from({ length: days * sessionsPerDay });
+  const totalSessions = days * sessionsPerDay;
+  const schedule = FIXED_PICTURE_SCHEDULE.slice(0, totalSessions);
+  const fallback = pictureBank().map(pic => pic.id);
 
-  for (let slot = 0; slot < sessionsPerDay; slot += 1) {
-    const slotOrder = pics
-      .map((pic, index) => ({ id: pic.id, rank: uidHash(`${state.participantId}:pic-slot:${slot}:${index}:${pic.id}`, 100000) }))
-      .sort((a, b) => a.rank - b.rank)
-      .map(item => item.id);
-    for (let day = 0; day < days; day += 1) {
-      schedule[day * sessionsPerDay + slot] = slotOrder[day % slotOrder.length];
-    }
-  }
-
-  for (let i = 1; i < schedule.length; i += 1) {
-    if (schedule[i] !== schedule[i - 1]) continue;
-    const slot = i % sessionsPerDay;
-    const swap = schedule.findIndex((id, j) => {
-      if (j <= i || j % sessionsPerDay !== slot) return false;
-      const current = schedule[i];
-      const leftOk = id !== schedule[i - 1];
-      const rightOk = i + 1 >= schedule.length || id !== schedule[i + 1];
-      const swapLeftOk = j === 0 || current !== schedule[j - 1];
-      const swapRightOk = j + 1 >= schedule.length || current !== schedule[j + 1];
-      return leftOk && rightOk && swapLeftOk && swapRightOk;
-    });
-    if (swap > i) {
-      const tmp = schedule[i];
-      schedule[i] = schedule[swap];
-      schedule[swap] = tmp;
-    }
+  for (let i = schedule.length; i < totalSessions; i += 1) {
+    const candidate = fallback.find(id => id !== schedule[i - 1]) || fallback[0];
+    schedule.push(candidate);
   }
 
   return schedule;
@@ -1823,7 +1823,7 @@ function startEmaDraft(row, index = 0) {
     picture: pic,
     speechScheduleVersion: "balanced-slot-v1",
     speechSchedulePosition: index + 1,
-    pictureScheduleVersion: "balanced-slot-v1",
+    pictureScheduleVersion: "fixed-20-picture-v2",
     pictureSchedulePosition: index + 1,
     survey: {},
     final: {},
