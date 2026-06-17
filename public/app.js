@@ -6,18 +6,18 @@ const DEMO_MODE = QUERY.get("demo") === "1";
 const STUDY_MODE = QUERY.get("mode") === "qualification" ? "qualification" : "main";
 
 const SPEECH_PROMPTS = [
-  "Describe situations in your everyday life when your thinking tends to feel especially clear or sharp. What are you usually doing, and what do you think helps?",
-  "Describe some situations in your daily life when your thinking tends to feel slower or less clear. What kinds of activities are you usually doing, and how do you usually respond?",
-  "Tell us about the kinds of things that usually make it harder for you to concentrate, and how you typically handle that.",
-  "Think of a type of task that you generally find mentally demanding. Walk us through what it usually involves and how it typically feels for you.",
-  "Describe what it is generally like for you when you feel mentally tired but continue with your activities. What kinds of things do you usually do in those situations?",
-  "In a typical day, when do you tend to feel most alert and when do you tend to feel more tired? What are you usually doing at those times?",
-  "Describe the kinds of interruptions that commonly happen when you are trying to focus on something, and what usually happens afterwards.",
-  "Describe situations in your daily life when you need to switch quickly from one task to another. What kinds of tasks are involved, and how does that switch usually feel for you?",
-  "Describe some strategies you use to remember important things you need to do, and how well they usually work for you.",
-  "Tell us about how you usually plan your day or week. What kinds of steps do you take, and how do you keep track of them?",
-  "Describe situations in your life where you often have to keep track of several things at once. How do you usually manage this, and how does it typically go?",
-  "Tell us about situations in general where it can be harder for you to get your point across or to understand someone else. What tends to make communication more difficult in those cases?"
+  "Today or recently, when has your thinking felt especially clear or sharp? What were you doing, and what do you think helped?",
+  "Today or recently, when has your thinking felt slower or less clear? What was going on, and how did you respond?",
+  "What kinds of things have made it harder for you to concentrate today or recently, and how have you handled that?",
+  "Tell us about a task from today or recently that felt mentally demanding. What did it involve, and how did it feel?",
+  "Describe a time today or recently when you felt mentally tired but kept going. What were you doing, and what was that like?",
+  "So far today, or in a recent day, when did you feel most alert and when did you feel more tired? What were you doing at those times?",
+  "What kinds of interruptions have happened today or recently when you were trying to focus, and what happened afterwards?",
+  "Describe a time today or recently when you had to switch quickly from one task to another. What were the tasks, and how did the switch feel?",
+  "What have you done today or recently to remember important things you needed to do, and how well did that work?",
+  "Tell us about how you planned your day today, or how you planned a recent day. What steps did you take, and how did you keep track of them?",
+  "Describe a time today or recently when you had to keep track of several things at once. How did you manage it, and how did it go?",
+  "Tell us about a time today or recently when it was harder to get your point across or to understand someone else. What made communication difficult?"
 ];
 
 const PICTURES = [
@@ -993,7 +993,7 @@ function pictureBank() {
 }
 
 function groundedSpeechPrompt(prompt) {
-  return `Begin by naming one object you can see near you right now and saying where it is. Then answer this prompt: ${prompt}`;
+  return prompt;
 }
 
 function assignPrompts() {
