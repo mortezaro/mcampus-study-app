@@ -584,7 +584,7 @@ function welcome() {
     <h1>${mainEntry ? "Start M-CAMPUS main longitudinal study" : "Start M-CAMPUS onboarding"}</h1>
     <p class="lead">${mainEntry
       ? "This is your one-time entry into the full longitudinal study. After this visit, all EMA sessions happen in the app on a schedule."
-      : "This short setup visit confirms the parts of the study we have not already captured in screening before the 12-day EMA phase begins."}</p>
+      : "This short setup visit confirms the parts of the study we have not already captured in screening before the 10-day EMA phase begins."}</p>
     <div class="field">
       <label for="pid">Participant ID</label>
       <input id="pid" class="input" autocomplete="off" value="${html(state.participantId)}" placeholder="Loaded from Prolific when available">
@@ -593,8 +593,8 @@ function welcome() {
     <div class="band">
       <h2>What happens next</h2>
       <p>${mainEntry
-        ? "This visit completes the intake stage. After this, the study stays in the app, where 11 days of EMA sessions are scheduled and tracked automatically."
-        : "This onboarding visit is only questionnaires and instructions. After this, you will complete 11 days of EMA, 3 sessions per day, one session per link."}</p>
+        ? "This visit completes the intake stage. After this, the study stays in the app, where 10 days of EMA sessions are scheduled and tracked automatically."
+        : "This onboarding visit is only questionnaires and instructions. After this, you will complete 10 days of EMA, 3 sessions per day, one session per link."}</p>
       <p>${mainEntry
         ? "The task flow includes clear instructions, brief practice where applicable, and corrective feedback during the task experience."
         : "This virtual onboarding also explains how the task flow works, including task instructions, brief practice where applicable, and corrective feedback during the task experience."}</p>
@@ -618,9 +618,9 @@ function consent() {
   }
   page(`
     <h1>Consent</h1>
-    <p class="lead">You are invited to take part in a 12-day mobile study about how thinking and attention vary in daily life, and whether short speech samples and context information can help predict these fluctuations.</p>
+    <p class="lead">You are invited to take part in a 10-day mobile study about how thinking and attention vary in daily life, and whether short speech samples and context information can help predict these fluctuations.</p>
     <div class="band">
-      <p><strong>Participation.</strong> This onboarding visit is brief. After that, you will complete 11 days of EMA, 3 times per day, with one short session each time you open a scheduled link.</p>
+      <p><strong>Participation.</strong> This onboarding visit is brief. After that, you will complete 10 days of EMA, 3 times per day, with one short session each time you open a scheduled link.</p>
       <p><strong>Tasks.</strong> Each session includes short questionnaires, a 60-90 second spoken response, brief cognitive tasks, and a question about interruptions or experience.</p>
       <p><strong>Virtual onboarding.</strong> Participants review the task instructions up front. The task flow also includes brief practice where applicable and corrective feedback during the task experience.</p>
       <p><strong>Completion bonuses.</strong> Participants can qualify for bonus tiers by completing at least 80%, 90%, or 100% of the scheduled sessions, according to the study payment plan.</p>
@@ -728,7 +728,7 @@ function onboardingCommitment() {
     </label>
     <label class="choice">
       <input type="checkbox" data-field="onboarding_schedule_ok" ${state.forms.onboarding_schedule_ok ? "checked" : ""}>
-      <span>I understand that the study lasts 11 days with 3 sessions per day, and I intend to complete the scheduled sessions.</span>
+      <span>I understand that the study lasts 10 days with 3 sessions per day, and I intend to complete the scheduled sessions.</span>
     </label>
     <label class="choice">
       <input type="checkbox" data-field="onboarding_safe_ok" ${state.forms.onboarding_safe_ok ? "checked" : ""}>
@@ -745,7 +745,7 @@ function onboardingCommitment() {
   document.querySelector("#next").onclick = async () => {
     if (!requireFields([
       { name: "onboarding_phone_ok", label: "Smartphone agreement" },
-      { name: "onboarding_schedule_ok", label: "12-day schedule agreement" },
+      { name: "onboarding_schedule_ok", label: "10-day schedule agreement" },
       { name: "onboarding_safe_ok", label: "Safety agreement" },
       { name: "onboarding_authenticity", label: "Speech authenticity agreement" }
     ])) return;
@@ -789,7 +789,7 @@ function eligibility() {
   const q = [
     ["age18_70", "I am between 18 and 70 years old."],
     ["smartphone", "I have access to a smartphone with a working microphone and internet connection."],
-    ["daily", "I am willing to complete 3 short sessions per day for 11 days."],
+    ["daily", "I am willing to complete 3 short sessions per day for 10 days."],
     ["audio", "I am willing to provide short audio recordings."],
     ["no_neuro", "I do not have a neurological disorder that would make the tasks unsuitable."],
     ["no_speech_hearing", "I do not have a major uncorrected speech or hearing impairment."],
