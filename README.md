@@ -89,7 +89,7 @@ With `ADMIN_TOKEN` set, use these protected endpoints:
 - `/api/admin/uploads/FILENAME?token=ADMIN_TOKEN` downloads a single uploaded audio file.
 ## Deployment Shape
 
-For a real study, deploy this as a HTTPS web app. Mobile participants should use the normal browser on their phone, usually Safari on iPhone/iOS and Chrome on Android. No App Store or Google Play app is needed.
+Mobile participants should use the normal browser on their phone, usually Safari on iPhone/iOS and Chrome on Android. No App Store or Google Play app is needed.
 
 Good hosting options:
 
@@ -128,13 +128,3 @@ The open-source task code is vendored under `vendor/tmb` so the deployed app is 
 - `vendor/tmb/TMB_MOT`
 
 The M-CAMPUS wrapper launches these pages in an embedded frame and captures official TMB outcomes and trial rows via `postMessage`. The served copies are lightly mobile-adapted so `chooseinput=false` forces tap mode and accepts both phone taps and desktop clicks during testing, avoiding keyboard/SPACEBAR instructions in the phone-first study flow.
-
-## Before Launch
-
-- Review the consent and questionnaire wording against the final approved ethics pack.
-- Replace SVG picture-description placeholders with approved stimuli if needed.
-- Set `PROLIFIC_COMPLETION_URL` to the real Prolific completion URL.
-- Set `ADMIN_TOKEN` or disable the admin view in production.
-- Add encrypted object storage for recordings.
-- Confirm retention, deletion, and participant withdrawal procedures.
-- Run the phone pilot checklist in `LAUNCH_CHECKLIST.md`.
